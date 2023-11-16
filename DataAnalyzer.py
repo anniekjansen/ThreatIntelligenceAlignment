@@ -42,3 +42,7 @@ class DataAnalyzer:
     def check_uniques(self, data):
         print(data.nunique())
 
+    def check_uniques_columns(self, data, columns):
+        for col in columns:
+            data_col = data[col]
+            print(col, ':', data_col.nunique(), 'unique values')

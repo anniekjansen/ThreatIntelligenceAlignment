@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 from DataSaverLoader import DataSaverLoader
 from DataAnalyzer import DataAnalyzer
-from DataProcessing import DataProcessing
+# from DataProcessor import DataProcessor
 
 """ Load initial dataset """
 # data = DataAnalyzer().load_csv("NCSC_advisories.csv")
@@ -16,7 +16,7 @@ print(data)
 # DataAnalyzer().print_histogram(data, "Kans")
 # DataAnalyzer().print_selected_columns(data, ["Titel","NCSC ID","Advisory ID"])
 # DataAnalyzer().print_selected_cell(data, 1, "Mogelijke oplossingen")
-# DataAnalyzer().print_selected_value(data, "Advisory ID", 32000)
+DataAnalyzer().print_selected_value(data, "NCSC ID", 'NCSC-2023-0023')
 # DataAnalyzer().print_selected_cell(data, 11806, "NCSC ID")
 # DataAnalyzer().print_selected_cell(data, 0, "NCSC ID")
 
@@ -26,17 +26,6 @@ print(data)
 
 """ Check for unique values in the dataset """
 # DataAnalyzer().check_uniques(data)
-
-""" Drop duplicates from the dataset """
-data = DataProcessing().drop_duplicates(data)
-
-""" Drop columns from the dataset """
-# data = DataProcessing().drop_columns(data, ["Mogelijke oplossingen"])
-# print(data)
-
-""" Save intermediate dataset """
-DataSaverLoader().save_dataset(data,"dropped_data")
-
-
+DataAnalyzer().check_uniques_columns(data, ['Advisory ID', 'NCSC ID'])
 
 
