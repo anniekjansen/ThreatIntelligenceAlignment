@@ -1,13 +1,13 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from DataSaverLoader import DataSaverLoader
+from DataLoaderSaver import DataLoaderSaver
 from DataAnalyzer import DataAnalyzer
 # from DataProcessor import DataProcessor
 
 """ Load initial dataset """
 # data = DataAnalyzer().load_csv("NCSC_advisories.csv")
-data = DataSaverLoader().load_dataset("initial")
+data = DataLoaderSaver().load_dataset("initial")
 print(data)
 
 """ Exploring the dataset """

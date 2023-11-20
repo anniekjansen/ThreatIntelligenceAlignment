@@ -1,7 +1,7 @@
 import pandas as pd
 from pathlib import Path
 
-class DataSaverLoader:
+class DataLoaderSaver:
 
     def load_dataset(self, dataset_name):
         data_path = Path("./intermediate_datafiles/")
@@ -15,9 +15,9 @@ class DataSaverLoader:
 
         return data
     
-    def save_dataset(self, data, dataset_name):
+    def save_dataset(self, data, dataset_name, seperator=","):
         data_path = Path("./intermediate_datafiles/")
         dataset = f"NCSC_advisories_{dataset_name}.csv"
 
-        data.to_csv(data_path / dataset)
+        data.to_csv(data_path / dataset, sep=seperator)
 
