@@ -6,6 +6,14 @@ Anniek Jansen
 
 Included in this repository:
 
-* DataSaverLoader.py: to load and save datasets
-* DataAnalyzer.py: to analyze the initial dataset
-* DataProcessing.py: to preprocess the dataset
+Classes:
+* DataLoaderSaver.py: functions to load and save datasets
+* DataAnalyzer.py: functions to analyze the dataset
+* DataProcessor.py: functions to preprocess the dataset
+
+Pipeline:
+* exploration.py: exploratory data analysis
+* processing.py: pre-processing of the dataset
+* feature_engineering.py: engineering of new columns to the original dataset
+* label_engineering.py: engineering of new classification/label columns
+

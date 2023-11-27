@@ -7,13 +7,16 @@ from DataProcessor import DataProcessor
 
 """ Load initial dataset """
 data = DataLoaderSaver().load_dataset("initial")
-print(data)
 
-""" Drop duplicates from the dataset """
+""" Delete duplicates from the dataset """
 data = DataProcessor().drop_duplicates(data)
 
-""" Drop columns from the dataset """
+""" Delete unimportant columns from the dataset """
 # data = DataProcessing().drop_columns(data, ["Mogelijke oplossingen"])
+
+""" Delete rows where NCSC ID does not occure more than once """
+data = data.loc[data.duplicated(subset=['NCSC ID'], keep=False)]
+data = data.reset_index(drop=True)
 
 """ Change column Uitgiftedatum from object to datetime type """
 data = DataProcessor().object_to_datetime(data)
