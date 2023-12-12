@@ -49,6 +49,8 @@ print("Justified+important change:", df['Justified+important change'].sum())
 print("Total:", df['No change'].sum() + df['Unjustified change'].sum() + df['Unimportant change'].sum() + df['Justified+important change'].sum())
 print(len(df))
 
+# OR
+
 """ Add one new classification column about the changes related to the Beschrijving """
 df['Change'] = ""
 

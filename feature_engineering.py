@@ -12,10 +12,10 @@ data = DataLoaderSaver().load_dataset("processed")
 
 """ Create dataframe with necessary columns """
 data = data[['Advisory ID','NCSC ID', 'Uitgiftedatum','Beschrijving', 'Kans']]
-data = data.sort_values(by='Uitgiftedatum')
-data = data.reset_index(drop=True)
 
 """ Create new column with the number of updates per NCSC ID """
+data = data.sort_values(by='Uitgiftedatum')
+data = data.reset_index(drop=True)
 data['Update'] = pd.Series(dtype='int')
 NCSC_ids = []
 

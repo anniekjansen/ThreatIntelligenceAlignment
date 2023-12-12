@@ -3,10 +3,6 @@ import matplotlib.pyplot as plt
 
 class DataAnalyzer:
 
-    def load_csv(self, input_csv):
-        data = pd.read_csv(input_csv, index_col=0)
-        return data
-
     def print_column_names(self, data):
         print("Columns:")
         for column in data.columns:
