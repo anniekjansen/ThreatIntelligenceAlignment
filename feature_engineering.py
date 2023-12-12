@@ -8,7 +8,7 @@ from DataAnalyzer import DataAnalyzer
 from DataProcessor import DataProcessor
 
 """ Load processed dataset """
-data = DataLoaderSaver().load_dataset("processed")
+data = DataLoaderSaver().load_dataset("scraped")
 
 """ Create dataframe with necessary columns """
 data = data[['Advisory ID','NCSC ID', 'Uitgiftedatum','Beschrijving', 'Kans']]
