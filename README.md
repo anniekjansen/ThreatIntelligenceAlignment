@@ -11,6 +11,7 @@ Classes:
 * DataAnalyzer.py: functions to analyze the dataset
 * DataProcessor.py: functions to preprocess the dataset
 * DataScraper.py: functions to scrape data from the NCSC website
+* DataEngineering.py: functions to create new columns
 
 Pipeline:
 * exploration.py: exploratory data analysis

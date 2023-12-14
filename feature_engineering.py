@@ -8,12 +8,12 @@ from DataAnalyzer import DataAnalyzer
 from DataProcessor import DataProcessor
 
 """ Load processed dataset """
-data = DataLoaderSaver().load_dataset("scraped")
+data = DataLoaderSaver().load_dataset("processed")
 
 """ Create dataframe with necessary columns """
-data = data[['Advisory ID','NCSC ID', 'Uitgiftedatum','Beschrijving', 'Kans']]
+data = data[['Advisory ID','NCSC ID','Uitgiftedatum','Beschrijving', 'Kans','Schade']]
 
-""" Create new column with the number of updates per NCSC ID """
+""" Create new column with the number of updates per NCSC ID """ ## column Versie differs in updates (either 2.00 or 1.01)
 data = data.sort_values(by='Uitgiftedatum')
 data = data.reset_index(drop=True)
 data['Update'] = pd.Series(dtype='int')
