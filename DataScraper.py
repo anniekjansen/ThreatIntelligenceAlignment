@@ -18,10 +18,13 @@ class DataScraper:
         chrome_options.add_argument("--headless")
         browser = webdriver.Chrome(options=chrome_options)
         browser.get(url)
-        WebDriverWait(browser, 5).until(EC.presence_of_element_located((By.ID, 'ncsc_adv_history')))
-        html = browser.page_source
-        soup = BeautifulSoup(html, 'lxml')
-        return soup
+        try:
+            WebDriverWait(browser, 5).until(EC.presence_of_element_located((By.ID, 'ncsc_adv_history')))
+            html = browser.page_source
+            soup = BeautifulSoup(html, 'lxml')
+            return soup
+        except: 
+           pass
 
     def scrape_data(self, soup, scrape):
         
