@@ -7,8 +7,12 @@ from DataLoaderSaver import DataLoaderSaver
 from DataAnalyzer import DataAnalyzer
 from DataProcessor import DataProcessor
 
-""" Load processed dataset """
-data = DataLoaderSaver().load_dataset("processed")
+""" Set dataset to run (NCSC/APT) """
+security_dataset = "NCSC"
+# security_dataset = "APT"
+
+""" Load initial dataset """
+data = DataLoaderSaver().load_dataset(security_dataset, "processed")
 
 """ Create dataframe with necessary columns """
 data = data[['Advisory ID','NCSC ID','Uitgiftedatum','Beschrijving', 'Kans','Schade']]
@@ -52,5 +56,4 @@ for row in range(len(data)):
 print(data.head(10))
 
 """ Save intermediate dataset """
-DataLoaderSaver().save_dataset(data,"engineered", "$")
-
+DataLoaderSaver().save_dataset(data, security_dataset, "engineered", "$")

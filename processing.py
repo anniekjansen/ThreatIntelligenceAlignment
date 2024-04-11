@@ -5,8 +5,12 @@ from DataLoaderSaver import DataLoaderSaver
 # from DataAnalyzer import DataAnalyzer
 from DataProcessor import DataProcessor
 
+""" Set dataset to run (NCSC/APT) """
+security_dataset = "NCSC"
+# security_dataset = "APT"
+
 """ Load initial dataset """
-data = DataLoaderSaver().load_dataset("initial")
+data = DataLoaderSaver().load_dataset(security_dataset, "initial")
 
 """ Delete duplicates from the dataset """
 data = DataProcessor().drop_duplicates(data)
@@ -22,6 +26,6 @@ data = data.reset_index(drop=True)
 data = DataProcessor().object_to_datetime(data)
 
 """ Save intermediate dataset """
-DataLoaderSaver().save_dataset(data,"processed")
+DataLoaderSaver().save_dataset(data, security_dataset, "processed")
 
 # print(data)

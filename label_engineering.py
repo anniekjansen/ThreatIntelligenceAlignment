@@ -6,8 +6,12 @@ from DataAnalyzer import DataAnalyzer
 from DataProcessor import DataProcessor
 from DataEngineering import DataEngineering
 
+""" Set dataset to run (NCSC/APT) """
+security_dataset = "NCSC"
+# security_dataset = "APT"
+
 """ Load engineered dataset """
-data = DataLoaderSaver().load_dataset("engineered", "$")
+data = DataLoaderSaver().load_dataset(security_dataset, "engineered", "$")
 
 """ Create new dataframe """
 data = data.sort_values(['NCSC ID', 'Update']) ## Use version
@@ -49,4 +53,4 @@ DataEngineering().print_overview(df,"Schade")
 #         df.loc[row,'Change'] = "Justified & important" #3
 
 """ Save intermediate dataset """
-DataLoaderSaver().save_dataset(df,"labelled", "$")
+DataLoaderSaver().save_dataset(df, security_dataset, "labelled", "$")

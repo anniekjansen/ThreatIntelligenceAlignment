@@ -5,8 +5,12 @@ from DataLoaderSaver import DataLoaderSaver
 from DataAnalyzer import DataAnalyzer
 from DataScraper import DataScraper
 
+""" Set dataset to run (NCSC/APT) """
+security_dataset = "NCSC"
+# security_dataset = "APT"
+
 """ Load processed dataset """
-data = DataLoaderSaver().load_dataset("processed")
+data = DataLoaderSaver().load_dataset(security_dataset, "processed")
 
 """ Create list with valid NCSC_IDs from dataset """
 print(data['NCSC ID'].unique())
@@ -35,4 +39,4 @@ for NCSC_ID in NCSC_IDs:
 DataAnalyzer().print_selected_columns(data, ["NCSC ID","kans_dict", "schade_dict"])
 
 """ Save intermediate dataset """
-DataLoaderSaver().save_dataset(data,"scraped")
+DataLoaderSaver().save_dataset(data, security_dataset, "scraped")

@@ -22,6 +22,7 @@ class DataAnalyzer:
 
     def print_histogram(self, data, column_title):
         data[column_title].value_counts().plot(kind='bar')
+        plt.xticks(rotation=15)
         plt.show()
 
     def print_barchart_kans_schade(self, data, columns):
