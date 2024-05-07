@@ -1,5 +1,7 @@
 import pandas as pd
 import datetime
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 class DataProcessor:
 
@@ -18,6 +20,10 @@ class DataProcessor:
             data.loc[row,'Uitgiftedatum'] = datetime_obj
         data['Uitgiftedatum']= pd.to_datetime(data['Uitgiftedatum'],utc=True)
         return data
+
+    def create_boxplot(self, data, column):
+        sns.boxplot(data[column])
+        plt.show()
     
     
     
