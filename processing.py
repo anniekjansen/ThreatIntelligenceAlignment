@@ -22,14 +22,14 @@ data = DataProcessor().drop_columns(data, ["NCSC inschaling","Versies"])
 data = data.loc[data.duplicated(subset=['NCSC ID'], keep=False)]
 data = data.reset_index(drop=True)
 
-""" Change column Uitgiftedatum from object to datetime type """
-data = DataProcessor().object_to_datetime(data)
-
 """ Check for outliers and consistency of Advisory ID through a boxplot """
 print(print(data.dtypes))
 DataProcessor().create_boxplot(data, 'Advisory ID')
 DataAnalyzer().check_uniques_columns(data, ['Advisory ID'])
 print(data.shape)
+
+""" Change column Uitgiftedatum from object to datetime type """
+data = DataProcessor().object_to_datetime(data)
 
 """ Check for outliers and missing values of Uitgiftedatum through a lineplot """
 data_plot = data
@@ -42,6 +42,8 @@ plt.xlabel('Year')
 plt.ylabel('Count')
 plt.savefig('lineplot_Uitgiftedatum.png')
 plt.show()
+
+data = data.reset_index()
 
 """ Save intermediate dataset """
 DataLoaderSaver().save_dataset(data, security_dataset, "processed")
