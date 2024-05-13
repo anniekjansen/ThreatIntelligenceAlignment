@@ -32,14 +32,7 @@ for row in range(len(data)):
         data.loc[row,'Update'] = count + 1
         NCSC_ids.append(data.loc[row,'NCSC ID'])
 
-"""" NLP """
-# nlp = spacy.load("nl_core_news_sm")
-# doc = nlp(sentences[0])
-# print(doc.text)
-# for token in doc:
-#     print(token.text, token.pos_, token.dep_)
-
-""" Create new column with the number of words and tokens of each Beschrijving """
+""" Create new columns, including the number of words and tokens of each Beschrijving """
 data['Words'] = pd.Series(dtype='int')
 data['Tokens'] = pd.Series(dtype='int')
 
@@ -47,8 +40,6 @@ for row in range(len(data)):
     if type(data.loc[row,'Beschrijving']) == str:
         data.loc[row,'Words'] = len(data.loc[row,'Beschrijving'].split())
         data.loc[row,'Tokens'] = len(nltk.word_tokenize(data.loc[row,'Beschrijving']))
-        # print(data.loc[row,'Beschrijving'].split())
-        # print(nltk.word_tokenize(data.loc[row,'Beschrijving']))
     else:
         data.loc[row,'Words'] = 0
         data.loc[row,'Tokens'] = 0

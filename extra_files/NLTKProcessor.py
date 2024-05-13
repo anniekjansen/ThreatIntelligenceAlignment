@@ -11,7 +11,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 
 from nltk.tag.perceptron import PerceptronTagger
 
-class TextProcessor:
+class NLTKProcessor:
 
     def download_nltk_items(self):
         nltk.download('stopwords', 'dutch') #stopwords
