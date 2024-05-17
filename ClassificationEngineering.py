@@ -1,6 +1,6 @@
 import pandas as pd
 
-class DataEngineering:
+class ClassificationEngineering:
 
     def create_change_columns(self, df, kans_schade):
         df[kans_schade + ' no change'] = 0
