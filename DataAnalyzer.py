@@ -22,8 +22,16 @@ class DataAnalyzer:
 
     def print_histogram(self, data, column_title):
         data[column_title].value_counts().plot(kind='bar')
-        plt.xticks(rotation=15)
-        plt.show()
+        plt.xticks(rotation=30, fontsize = 9)
+        plt.ylabel("Count")
+        plt.xlabel("Threat Vectors")
+
+        ax = plt.gca()
+        for p in ax.patches:
+            ax.annotate(str(p.get_height()), (p.get_x() + p.get_width() / 2, p.get_height()), 
+                ha='center', va='center', xytext=(0, 5), textcoords='offset points', fontsize=9)
+
+        plt.show()        
 
     def print_barchart_kans_schade(self, data, columns):
         df1 = pd.DataFrame()
@@ -73,3 +81,11 @@ class DataAnalyzer:
         for col in columns:
             data_col = data[col]
             print(col, ':', data_col.nunique(), 'unique values')
+    
+    def check_column_types(self, data):
+        for col in data.columns:
+            print(data[col].apply(type))
+
+    def create_boxplot(self, data, column):
+        sns.boxplot(data[column])
+        plt.show()

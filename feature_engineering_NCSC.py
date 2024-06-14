@@ -7,15 +7,14 @@ from DataLoaderSaver import DataLoaderSaver
 from DataAnalyzer import DataAnalyzer
 from DataProcessor import DataProcessor
 
-""" Set dataset to run (NCSC/APT) """
+""" Set dataset to run """
 security_dataset = "NCSC"
-# security_dataset = "APT"
 
 """ Load initial dataset """
 data = DataLoaderSaver().load_dataset(security_dataset, "processed")
 
 """ Create dataframe with necessary columns """
-data = data[['Advisory ID','NCSC ID','Uitgiftedatum','Beschrijving', 'Kans','Schade']]
+# data = data[['Advisory ID','NCSC ID','Uitgiftedatum','Beschrijving', 'Kans','Schade']]
 
 """ Create new column with the number of updates per NCSC ID """ ## column Versie differs in updates (either 2.00 or 1.01)
 data = data.sort_values(by='Uitgiftedatum')

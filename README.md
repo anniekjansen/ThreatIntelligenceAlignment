@@ -13,10 +13,12 @@ Classes:
 * ClassificationEngineering.py: functions to create new classification columns
 
 Pipeline:
-* exploration.py: exploratory data analysis
-* processing.py: pre-processing of the dataset
-* feature_engineering.py: engineering of new columns to the original dataset
-* classification_engineering.py: engineering of a new dataframe including four classification columns for the change in description
+* exploration_NCSC.py: exploratory data analysis of the NCSC dataset
+* exploration_APT.py: exploratory data analysis of the APT dataset
+* processing_NCSC.py: pre-processing of the NCSC dataset
+* processing_APT.py: pre-processing of the APT dataset
+* feature_engineering_NCSC.py: engineering of new attributes to the NCSC dataset
+* classification_engineering.py: engineering of a new dataframe including four classification columns for the change in NCSC description
 
 Extra files (excluded from final pipeline):
 * DataScraper.py: functions to scrape data from the NCSC website

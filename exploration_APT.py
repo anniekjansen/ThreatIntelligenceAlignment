@@ -1,0 +1,21 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+
+from DataLoaderSaver import DataLoaderSaver
+from DataAnalyzer import DataAnalyzer
+
+""" Set dataset to run """
+security_dataset = "APT"
+
+""" Load initial dataset """
+data = DataLoaderSaver().load_dataset(security_dataset, "initial")
+
+""" General exploring of the dataset """
+DataAnalyzer().print_column_names(data)
+DataAnalyzer().print_info(data)
+DataAnalyzer().check_duplicates(data)
+DataAnalyzer().check_uniques(data)
+
+""" Exploring specifics of the APT dataset """
+if security_dataset == 'APT':
+    DataAnalyzer().print_histogram(data, "attack_vector")
