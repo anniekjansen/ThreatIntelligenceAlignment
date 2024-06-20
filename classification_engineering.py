@@ -63,4 +63,4 @@ df = DataProcessor().drop_columns(df, ["Beschrijving old","Beschrijving new", "K
 print(df.shape)
 
 """ Save intermediate dataset """
-DataLoaderSaver().save_dataset(df, security_dataset, "classification", "$")
+DataLoaderSaver().save_dataset(df, security_dataset, "classification")

@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 
 from DataLoaderSaver import DataLoaderSaver
 from DataAnalyzer import DataAnalyzer
+from DataProcessor import DataProcessor
 
 """ Set dataset to run """
 security_dataset = "APT"
@@ -16,6 +17,5 @@ DataAnalyzer().print_info(data)
 DataAnalyzer().check_duplicates(data)
 DataAnalyzer().check_uniques(data)
 
-""" Exploring specifics of the APT dataset """
-if security_dataset == 'APT':
-    DataAnalyzer().print_histogram(data, "attack_vector")
+""" Exploring specifics of the APT dataset using plots """
+DataAnalyzer().print_histogram(data, "attack_vector")

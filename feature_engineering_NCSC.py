@@ -46,4 +46,4 @@ for row in range(len(data)):
 print(data.head(10))
 
 """ Save intermediate dataset """
-DataLoaderSaver().save_dataset(data, security_dataset, "engineered", "$")
+DataLoaderSaver().save_dataset(data, security_dataset, "engineered")
