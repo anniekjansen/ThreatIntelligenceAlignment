@@ -12,38 +12,52 @@ security_dataset = "NCSC"
 """ Load initial dataset """
 data = DataLoaderSaver().load_dataset(security_dataset, "initial")
 
-""" Data Selection: delete duplicates from the dataset """
+""" Data Selection """
+
+""" Delete duplicates from the dataset """
 data = DataProcessor().drop_duplicates(data)
 
-""" Data Selection: delete irrelevant columns from the dataset """
+""" Delete irrelevant columns from the dataset """
 data = DataProcessor().drop_columns(data, ["NCSC inschaling","Versie", "Schadeomschrijving", "Mogelijke oplossingen"])
 
-""" Data Selection: delete rows where NCSC ID does not occure more than once """
+""" Delete rows where NCSC ID does not occure more than once """
 data = data.loc[data.duplicated(subset=['NCSC ID'], keep=False)]
 data = data.reset_index(drop=True)
 
-""" Data Selection: change column Uitgiftedatum from object to datetime type """
+""" Change column Uitgiftedatum from object to datetime type """
 data = DataProcessor().object_to_datetime(data, 'Uitgiftedatum')
 
-""" Data Selection: check for outliers and missing values of Uitgiftedatum through a lineplot """
-data_plot = data
-data_plot.set_index('Uitgiftedatum', inplace=True)
-grouped = data_plot.groupby(data_plot.index.year).size()
-count_data = pd.DataFrame({'year': grouped.index, 'count': grouped.values})
-count_data.plot(kind='line', x='year', y='count')
-plt.title('Line plot of the Instances per Year')
-plt.xlabel('Year')
-plt.ylabel('Count')
-plt.savefig('lineplot_Uitgiftedatum.png')
+""" Check for outliers and missing values of Uitgiftedatum through a lineplot """
+data.set_index('Uitgiftedatum', inplace=True)
+data.index = pd.to_datetime(data.index)
+
+fig, ax = plt.subplots(figsize=(10, 6))
+counts = data.resample('A').size().sort_index()
+ax.plot(counts.index, counts.values, label='Uitgiftedatum')
+
+ax.set_title('Count per Year')
+ax.set_xlabel('Year')
+ax.set_ylabel('Count')
+ax.legend()
+ax.grid(True)
+
+# plt.savefig('lineplot_Uitgiftedatum.png')
 plt.show()
 
 data = data.reset_index()
 
-""" Data Cleaning: change column types """
+""" Data Cleaning """
+
+""" Change column types and clean input to None if applicable """
 DataAnalyzer().check_column_types(data)
-# DataAnalyzer().print_selected_cell(data, 1, "NCSC ID")
-DataProcessor().string_to_list(data, ['CVE-ID', "Toepassingen", "Versies", "Platformen"])
-# print(data['CVE-ID'].apply(type))
+data = DataProcessor().string_to_list(data, ['CVE-ID', "Toepassingen", "Versies", "Platformen"])
+data = DataProcessor().values_to_None(data, ['CVE-ID', "Toepassingen", "Versies", "Platformen"])
+
+""" Delete instances where CVE-ID is None """
+print(data.isna().sum())
+print("Total # of missing values:", data.isnull().sum().sum())
+data = data.dropna(subset=["CVE-ID"])
+print(data.isna().sum())
 
 """ Save intermediate dataset """
 DataLoaderSaver().save_dataset(data, security_dataset, "processed")

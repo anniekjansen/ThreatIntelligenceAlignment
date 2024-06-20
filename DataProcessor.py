@@ -25,10 +25,19 @@ class DataProcessor:
                 datetime_obj = datetime.datetime.strptime(date_string, '%Y-%m-%dT%H:%M:%S%z')
             else:
                 datetime_obj = datetime.datetime.strptime(date_string, '%Y-%m-%d')
-            data.loc[row, column] = datetime_obj
-        data[column]= pd.to_datetime(data[column],utc=True)
+        data.loc[row, column] = datetime_obj
+        if column == 'Uitgiftedatum':
+            data[column] = pd.to_datetime(data[column],utc=True)
+        else:
+            data[column] = pd.to_datetime(data[column])
         return data
-
+    
     def string_to_list(self, data, columns):
         for col in columns:
             data[col] = data[col].apply(ast.literal_eval)
+        return data
+
+    def values_to_None(self, data, columns):
+        for col in columns:
+            data[col] = data[col].apply(lambda x: None if x in ([], ['niet beschikbaar'], ["-"], ['-'], "*", "-") else x)
+        return data
