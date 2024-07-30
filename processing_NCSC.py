@@ -49,15 +49,24 @@ data = data.reset_index()
 """ Data Cleaning """
 
 """ Change column types and clean input to None if applicable """
-DataAnalyzer().check_column_types(data)
+# DataAnalyzer().check_column_types(data)
 data = DataProcessor().string_to_list(data, ['CVE-ID', "Toepassingen", "Versies", "Platformen"])
 data = DataProcessor().values_to_None(data, ['CVE-ID', "Toepassingen", "Versies", "Platformen"])
 
 """ Delete instances where CVE-ID is None """
 print(data.isna().sum())
-print("Total # of missing values:", data.isnull().sum().sum())
 data = data.dropna(subset=["CVE-ID"])
+
+""" Clean instances where CVE-ID contains CVE-IDs in a wrong format (spaces or punctuation) """
+for index, row in data.iterrows():
+    fixed_cve_ids = [DataProcessor().fix_cve_id(cve_id) for cve_id in row["CVE-ID"]]
+    fixed_cve_ids = [cve_id for cve_id in [DataProcessor().valid_cve_id(cve_id) for cve_id in fixed_cve_ids] if cve_id is not None]
+    data.at[index, "CVE-ID"] = fixed_cve_ids
+
+""" Delete again instances where CVE-ID is None """
+data = DataProcessor().values_to_None(data, ['CVE-ID'])
 print(data.isna().sum())
+data = data.dropna(subset=["CVE-ID"])
 
 """ Save intermediate dataset """
 DataLoaderSaver().save_dataset(data, security_dataset, "processed")

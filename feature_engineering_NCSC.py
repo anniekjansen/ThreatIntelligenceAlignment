@@ -13,9 +13,6 @@ security_dataset = "NCSC"
 """ Load initial dataset """
 data = DataLoaderSaver().load_dataset(security_dataset, "processed")
 
-""" Create dataframe with necessary columns """
-# data = data[['Advisory ID','NCSC ID','Uitgiftedatum','Beschrijving', 'Kans','Schade']]
-
 """ Create new column with the number of updates per NCSC ID """ ## column Versie differs in updates (either 2.00 or 1.01)
 data = data.sort_values(by='Uitgiftedatum')
 data = data.reset_index(drop=True)

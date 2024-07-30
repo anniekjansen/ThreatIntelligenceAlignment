@@ -55,8 +55,11 @@ ax.grid(True)
 # plt.savefig('lineplotTimeAPT.png')
 plt.show()
 
-""" Cclean input to None if applicable """
+""" Clean input to None if applicable """
 data = DataProcessor().values_to_None(data, ['version', "os"])
+
+""" Rename column vulnerability to CVE-ID to have a common unique identifier with NCSC data """
+data.rename(columns = {'vulnerability':'CVE-ID'}, inplace = True)
 
 """ Save intermediate dataset """
 DataLoaderSaver().save_dataset(data, security_dataset, "processed")

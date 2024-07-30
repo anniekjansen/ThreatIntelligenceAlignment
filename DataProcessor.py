@@ -3,6 +3,7 @@ import datetime
 import seaborn as sns
 import matplotlib.pyplot as plt
 import ast
+import string
 
 class DataProcessor:
 
@@ -26,10 +27,7 @@ class DataProcessor:
             else:
                 datetime_obj = datetime.datetime.strptime(date_string, '%Y-%m-%d')
         data.loc[row, column] = datetime_obj
-        if column == 'Uitgiftedatum':
-            data[column] = pd.to_datetime(data[column],utc=True)
-        else:
-            data[column] = pd.to_datetime(data[column])
+        data[column] = pd.to_datetime(data[column], utc=True)
         return data
     
     def string_to_list(self, data, columns):
@@ -41,3 +39,14 @@ class DataProcessor:
         for col in columns:
             data[col] = data[col].apply(lambda x: None if x in ([], ['niet beschikbaar'], ["-"], ['-'], "*", "-") else x)
         return data
+        
+    def fix_cve_id(self, cve_id):
+        cve_id_fixed = cve_id.translate(str.maketrans("", "", string.punctuation.replace("-", "")))
+        return cve_id_fixed
+     
+    def valid_cve_id(self, cve_id):
+        if (len(cve_id) in [13, 14] and cve_id[:3].isalpha() and cve_id[3] == "-" and all(c.isdigit() or c == "-" for c in cve_id[4:])):
+            valid_cve_id = cve_id
+            return valid_cve_id
+        else:
+            return None

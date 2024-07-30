@@ -24,4 +24,4 @@ class DataLoaderSaver:
 
         # data.to_csv(data_path / dataset, sep=seperator)
         data.to_json(data_path / dataset, orient='records', date_format='iso')
-
+        print("Dataset saved succesfully!")
