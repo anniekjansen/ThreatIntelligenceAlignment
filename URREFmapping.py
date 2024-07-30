@@ -1,6 +1,7 @@
 from rdflib import Graph, URIRef, Literal, Namespace
 from rdflib.namespace import RDF, XSD, RDFS, OWL
 import pandas as pd
+import string
 
 from DataLoaderSaver import DataLoaderSaver
 from DataAnalyzer import DataAnalyzer
@@ -17,49 +18,58 @@ g.parse("URREF.owl", format="xml")
 print("Graph loaded successfully!")
 
 """ Create URREF Namespace and bind this + other namespaces to the graph """
-URREF = Namespace("http://example.org/urref#")
-g.bind("urref", URREF)
+TI = Namespace("http://example.org/urref/")
+# URREF= Namespace("http://eturwg.c4i.gmu.edu/files/ontologies/URREF.owl#")
+g.bind("ti", TI)
 g.bind("rdfs", RDFS)
 g.bind("owl", OWL)
 
 """ Create new threat intelligence classes, including hierarcy, and add them to the graph """
 URREFHelper().create_classes(g, ["ThreatIntelligence", "Threat", "Vulnerability", "VulnerableProduct", "Time", "Product", "Platform", "Version"])
 URREFHelper().assign_labels(g,["ThreatIntelligence", "VulnerableProduct"], ["Threat Intelligence", "Vulnerable Product"])
-URREFHelper().add_subclasses_to_thing(g, [URREF.ThreatIntelligence])
-URREFHelper().add_subclasses_to_ti(g, [URREF.Threat, URREF.Vulnerability, URREF.VulnerableProduct, URREF.Time])
-URREFHelper().add_subclasses_to_vp(g, [URREF.Product, URREF.Platform, URREF.Version])
+URREFHelper().add_subclasses_to_thing(g, [TI.ThreatIntelligence])
+URREFHelper().add_subclasses_to_ti(g, [TI.Threat, TI.Vulnerability, TI.VulnerableProduct, TI.Time])
+URREFHelper().add_subclasses_to_vp(g, [TI.Product, TI.Platform, TI.Version])
 
-""" Explode the common identifier (CVE-ID) for the NCSC data """
-ncsc_data = ncsc_data.assign(CVE_ID=ncsc_data['CVE-ID']).explode('CVE_ID')
-ncsc_data = ncsc_data.drop(columns=['CVE-ID'])
-ncsc_data.rename(columns = {'CVE_ID':'CVE-ID'}, inplace = True)
-ncsc_data = ncsc_data.reset_index(drop=True)
+""" Explode the columns of the NCSC data that include lists """
+ncsc_data = URREFHelper().explode_columns(ncsc_data, ['CVE-ID', 'Platformen', 'Toepassingen', 'Versies'])
+ncsc_classification_data = URREFHelper().explode_columns(ncsc_classification_data, ['CVE-ID'])
 
-""" Explode the Platformen attribute for the NCSC data """
-ncsc_data = ncsc_data.assign(platformen=ncsc_data['Platformen']).explode('platformen')
-ncsc_data = ncsc_data.drop(columns=['Platformen'])
-ncsc_data.rename(columns = {'platformen':'Platformen'}, inplace = True)
-ncsc_data = ncsc_data.reset_index(drop=True)
+# apt_data.rename(columns = {'vulnerability':'CVE-ID'}, inplace = True)
 
-ncsc_data = ncsc_data.assign(toepassingen=ncsc_data['Toepassingen']).explode('toepassingen')
-ncsc_data = ncsc_data.drop(columns=['Toepassingen'])
-ncsc_data.rename(columns = {'toepassingen':'Toepassingen'}, inplace = True)
-ncsc_data = ncsc_data.reset_index(drop=True)
+# ncsc_data = ncsc_data.head(100)
+# apt_data = apt_data.head(100)
 
-ncsc_data = ncsc_data.assign(versies=ncsc_data['Versies']).explode('versies')
-ncsc_data = ncsc_data.drop(columns=['Versies'])
-ncsc_data.rename(columns = {'versies':'Versies'}, inplace = True)
-ncsc_data = ncsc_data.reset_index(drop=True)
+# print(ncsc_data.head())
+# print(apt_data.head())
 
-apt_data.rename(columns = {'vulnerability':'CVE-ID'}, inplace = True)
+print(f"Number of unique CVE-IDs NCSC: {len(ncsc_data['CVE-ID'].unique())}")
+print(f"Number of unique CVE-IDs APT: {len(apt_data['CVE-ID'].unique())}")
 
-ncsc_data = ncsc_data.head(100)
-apt_data = apt_data.head(100)
+""" Check the common instances """
+common_instances = pd.merge(ncsc_data, apt_data, on='CVE-ID')
+print(f"Number of common instances: {len(common_instances)}")
+print(f"Number of unique CVE-IDs: {len(common_instances['CVE-ID'].unique())}")
+common_instances = common_instances["CVE-ID"].unique()
+
+unique_to_apt_data = apt_data[~apt_data['CVE-ID'].isin(ncsc_data['CVE-ID'])]
+print(f"Number of unique CVE-IDs in APT that are not in NCSC: {len(unique_to_apt_data['CVE-ID'].unique())}")
+
+unique_to_ncsc_data = ncsc_data[~ncsc_data['CVE-ID'].isin(apt_data['CVE-ID'])]
+print(f"Number of unique CVE-IDs in NCSC that are not in APT: {len(unique_to_ncsc_data['CVE-ID'].unique())}") #should be none because NCSC is subset of APT
+
+# print(common_instances)
+
+# common = pd.merge(common_instances, ncsc_classification_data, on='CVE-ID')
+# print(f"Number of common instances: {len(common)}")
+# print(f"Number of unique CVE-IDs: {len(common['CVE-ID'].unique())}")
+
+print(hello)
 
 """ Add instances of the NCSC and APT datasets to the graph """
-for idx, row in ncsc_data.iterrows():
+for index, row in ncsc_data.iterrows():
     URREFHelper().create_instance(g, row, 'NCSC')
-for idx, row in apt_data.iterrows():
+for index, row in apt_data.iterrows():
     URREFHelper().create_instance(g, row, 'APT')
 
 """ Serialize and save the graph """
