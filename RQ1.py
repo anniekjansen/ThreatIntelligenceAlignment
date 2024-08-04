@@ -84,74 +84,67 @@ ncsc_classification_data = ncsc_classification_data[['CVE-ID', 'Justified']]
 merged = pd.merge(merged, ncsc_classification_data, on='CVE-ID')
 # print(merged.head())
 
-# Calculate time difference from Uitgiftedatum to exploited_time
 merged['Uitgiftedatum_to_exploited'] = (merged['exploited_time'] - merged['Uitgiftedatum']).dt.days
 
-# Filter the data to ensure 'Justified' column contains only 0 and 1
-assert set(merged['Justified'].unique()).issubset({0, 1}), "Unexpected values in 'Justified' column"
-
-# Separate data for justified and non-justified
 justified_exploited = merged.loc[merged['Justified'] == 1, 'Uitgiftedatum_to_exploited'].dropna()
 non_justified_exploited = merged.loc[merged['Justified'] == 0, 'Uitgiftedatum_to_exploited'].dropna()
 
 # Correlation analysis
 correlation_coefficient, p_value_corr = stats.pearsonr(merged['Justified'], merged['Uitgiftedatum_to_exploited'])
-print(f"Pearson correlation coefficient: {correlation_coefficient}, P-value: {p_value_corr}")
+print(f"Pearson correlation coefficient: {correlation_coefficient}, P-value: {p_value_corr:.4f}")
 
 # Statistical test: t-test between justified and non-justified for Uitgiftedatum to exploited_time
 t_stat, p_value = stats.ttest_ind(justified_exploited, non_justified_exploited, equal_var=False)
-print(f"T-statistic (Uitgiftedatum to exploited_time): {t_stat}, P-value: {p_value}")
+print(f"T-statistic (Uitgiftedatum to exploited_time): {t_stat}, P-value: {p_value:.4f}")
 
-
-""" RQ 1.3 """
-# Drop rows with missing values in relevant columns
-merged_chance = merged.dropna(subset=['Uitgiftedatum_to_exploited', 'Kans'])
-
-# Correlation analysis
-if len(merged_chance) > 0:
-    correlation_coefficient, p_value = stats.pearsonr(
-        merged_chance['Uitgiftedatum_to_exploited'],
-        pd.factorize(merged_chance['Kans'])[0]  # Convert categories to numerical
-    )
-    print(f"Pearson correlation coefficient: {correlation_coefficient}, P-value: {p_value}")
-else:
-    print("No valid data for correlation analysis.")
-
-# Statistical test: ANOVA or Kruskal-Wallis test (if non-normal distribution)
-if len(merged_chance) > 0:
-    anova_result = stats.f_oneway(
-        merged_chance.loc[merged_chance['Kans'] == 'Low', 'Uitgiftedatum_to_exploited'],
-        merged_chance.loc[merged_chance['Kans'] == 'Medium', 'Uitgiftedatum_to_exploited'],
-        merged_chance.loc[merged_chance['Kans'] == 'High', 'Uitgiftedatum_to_exploited']
-    )
-    print(f"ANOVA F-statistic: {anova_result.statistic}, P-value: {anova_result.pvalue}")
-else:
-    print("No valid data for statistical test.")
-
-
-
-
-
-# # Visualization: Box plot for Uitgiftedatum to exploited_time
-# sns.boxplot(x='Justified', y='Uitgiftedatum_to_exploited', data=merged)
-# plt.title('Justified vs Uitgiftedatum to Exploited Time')
+# plt.figure(figsize=(8, 6))
+# plt.scatter(merged['Justified'], merged['Uitgiftedatum_to_exploited'])
+# plt.xlabel('Justified (0 or 1)')
+# plt.ylabel('Time difference (Uitgiftedatum to exploited)')
+# plt.title('Scatterplot of Justified vs. Time difference')
 # plt.show()
 
-# # Calculate z-scores for Uitgiftedatum to exploited_time
-# merged['zscore'] = stats.zscore(merged['Uitgiftedatum_to_exploited'])
+plt.figure(figsize=(7, 6))
+plt.boxplot([justified_exploited, non_justified_exploited], patch_artist=True, medianprops=dict(color="black"))
+plt.xlabel('Justification')
+plt.ylabel('Time difference (in days)')
+plt.title('Boxplot Justification vs. Time Differences')
+plt.xticks([1, 2], ['Justified', 'Non-Justified'])
+plt.show()
 
-# # Identify outliers using z-score (typically |z-score| > 3 is considered an outlier)
-# outliers = merged[abs(merged['zscore']) > 5]
+""" RQ 1.4 """
+# Correlation analysis
+correlation_coefficient, p_value = stats.pearsonr(merged['Uitgiftedatum_to_exploited'],pd.factorize(merged['Kans'])[0])  # Convert categories to numerical
+print(f"Pearson correlation coefficient: {correlation_coefficient}, P-value: {p_value:.4f}")
 
-# # Count outliers by 'Justified' and 'Non-Justified'
-# justified_outliers = outliers[outliers['Justified'] == 1]
-# non_justified_outliers = outliers[outliers['Justified'] == 0]
+# Statistical test: ANOVA or Kruskal-Wallis test (if non-normal distribution)
+anova_result = stats.f_oneway(
+        merged.loc[merged['Kans'] == 'Low', 'Uitgiftedatum_to_exploited'],
+        merged.loc[merged['Kans'] == 'Medium', 'Uitgiftedatum_to_exploited'],
+        merged.loc[merged['Kans'] == 'High', 'Uitgiftedatum_to_exploited']
+    )
+print(f"ANOVA F-statistic: {anova_result.statistic}, P-value: {anova_result.pvalue:.4f}")
 
-# # Summary of outliers by classification
-# print("Total number of outliers:", len(outliers))
-# print("\nOutliers details:")
-# print(outliers[['CVE-ID', 'Uitgiftedatum_to_exploited', 'Justified', 'zscore']])
 
-# # Print counts of justified and non-justified outliers
-# print("\nCount of Justified outliers:", len(justified_outliers))
-# print("Count of Non-Justified outliers:", len(non_justified_outliers))
+# plt.figure(figsize=(8, 6))
+# plt.scatter(pd.factorize(merged['Kans'])[0], merged['Uitgiftedatum_to_exploited'])
+# plt.xlabel('Kans (Low, Medium, High)')
+# plt.ylabel('Time difference (Uitgiftedatum to exploited)')
+# plt.title('Scatterplot of Kans vs. Time difference')
+# plt.show()
+
+m = merged.groupby('Kans')['Uitgiftedatum_to_exploited'].apply(list)
+name_sort = {'Low':0,'Medium':1,'High':2}
+m = m.rename(index=name_sort)
+
+plt.figure(figsize=(7, 6))
+plt.boxplot(m.values.tolist(), patch_artist=True, medianprops=dict(color="black"))
+plt.xlabel('Likelihood')
+plt.ylabel('Time Differences (in days)')
+plt.title('Boxplot of Likelihood vs. Time Differences')
+plt.xticks([1, 2, 3], ['Low', 'Medium', 'High'])
+plt.show()
+
+""" Save intermediate dataset """
+security_dataset = "merged"
+DataLoaderSaver().save_dataset(merged, security_dataset, "merged")
