@@ -23,10 +23,9 @@ ncsc_data['Uitgiftedatum'] = pd.to_datetime(ncsc_data['Uitgiftedatum'], utc=True
 # print(f"Number of unique CVE-IDs NCSC: {len(ncsc_data['CVE-ID'].unique())}")
 # print(f"Number of unique CVE-IDs APT: {len(apt_data['CVE-ID'].unique())}")
 
+""" Select only necessary columns and merge NCSC and APT datasets"""
 ncsc = ncsc_data[["CVE-ID", "Uitgiftedatum", "Update", "Kans"]]
 apt = apt_data[['CVE-ID','reserved_time', "published_time", "exploited_time"]]
-
-""" Merge NCSC and APT datasets """
 merged = pd.merge(ncsc, apt, on='CVE-ID')
 
 """ Convert Uitgiftedatum to the first day of the month """
@@ -34,7 +33,6 @@ merged['Uitgiftedatum'] = merged['Uitgiftedatum'].dt.to_period('M').dt.to_timest
 merged['Uitgiftedatum'] = merged['Uitgiftedatum'].dt.tz_localize('UTC')
 
 """ RQ 1.1 """
-time_columns = ['Uitgiftedatum', 'reserved_time', 'published_time', 'exploited_time']
 
 # Convert datetime objects to Unix timestamps
 merged['Uitgiftedatum_unix'] = merged['Uitgiftedatum'].apply(lambda x: x.timestamp())
