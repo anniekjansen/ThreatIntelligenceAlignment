@@ -48,9 +48,9 @@ print(f"Correlation Coefficient: {update_1_corr_coef:.4f}")
 print(f"P-value: {update_1_p_value:.4f}")
 
 # Scatter plot
-plt.figure(figsize=(8, 6))
+plt.subplots(figsize=(6, 6))
 sns.scatterplot(x='Uitgiftedatum', y='reserved_time', data=merged[merged['Update'] == 1])
-plt.title('Reserved Time vs Uitgiftedatum for Update 1')
+plt.title('Reserved Time vs. Uitgiftedatum (initial update)')
 plt.show()
 
 mae_update_1 = np.mean(np.abs(merged[merged['Update'] == 1]['reserved_time'] - merged[merged['Update'] == 1]['Uitgiftedatum']))
@@ -66,9 +66,9 @@ print(f"Correlation Coefficient: {update_gt_1_corr_coef:.4f}")
 print(f"P-value: {update_gt_1_p_value:.4f}")
 
 # Scatter plot
-plt.figure(figsize=(8, 6))
+plt.subplots(figsize=(6, 6))
 sns.scatterplot(x='Uitgiftedatum', y='exploited_time', data=merged[merged['Update'] > 1])
-plt.title('Exploited Time vs Uitgiftedatum for Update 2 and up')
+plt.title('Exploited Time vs. Uitgiftedatum (subsequent updates)')
 plt.show()
 
 mae_update_gt_1 = np.mean(np.abs(merged[merged['Update'] > 1]['exploited_time'] - merged[merged['Update'] > 1]['Uitgiftedatum']))
@@ -102,11 +102,11 @@ print(f"T-statistic (Uitgiftedatum to exploited_time): {t_stat}, P-value: {p_val
 # plt.title('Scatterplot of Justified vs. Time difference')
 # plt.show()
 
-plt.figure(figsize=(7, 6))
+plt.subplots(figsize=(7, 6))
 plt.boxplot([justified_exploited, non_justified_exploited], patch_artist=True, medianprops=dict(color="black"))
 plt.xlabel('Justification')
 plt.ylabel('Time difference (in days)')
-plt.title('Boxplot Justification vs. Time Differences')
+plt.title('Justification vs. Time Differences')
 plt.xticks([1, 2], ['Justified', 'Non-Justified'])
 plt.show()
 
@@ -135,11 +135,11 @@ m = merged.groupby('Kans')['Uitgiftedatum_to_exploited'].apply(list)
 name_sort = {'Low':0,'Medium':1,'High':2}
 m = m.rename(index=name_sort)
 
-plt.figure(figsize=(7, 6))
+plt.subplots(figsize=(7, 6))
 plt.boxplot(m.values.tolist(), patch_artist=True, medianprops=dict(color="black"))
 plt.xlabel('Likelihood')
 plt.ylabel('Time Differences (in days)')
-plt.title('Boxplot of Likelihood vs. Time Differences')
+plt.title('Likelihood vs. Time Differences')
 plt.xticks([1, 2, 3], ['Low', 'Medium', 'High'])
 plt.show()
 
