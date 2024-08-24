@@ -58,6 +58,9 @@ plt.show()
 """ Clean input to None if applicable """
 data = DataProcessor().values_to_None(data, ['version', "os"])
 
+""" Normalization of product, version, and os """
+data = DataProcessor().mapping(data, security_dataset)
+
 """ Rename column vulnerability to CVE-ID to have a common unique identifier with NCSC data """
 data.rename(columns = {'vulnerability':'CVE-ID'}, inplace = True)
 

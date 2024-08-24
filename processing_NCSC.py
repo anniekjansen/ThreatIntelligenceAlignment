@@ -68,5 +68,8 @@ data = DataProcessor().values_to_None(data, ['CVE-ID'])
 print(data.isna().sum())
 data = data.dropna(subset=["CVE-ID"])
 
+""" Normalization of Toepassingen, Versies, and Platformen """
+data = DataProcessor().mapping(data, security_dataset)
+
 """ Save intermediate dataset """
 DataLoaderSaver().save_dataset(data, security_dataset, "processed")
