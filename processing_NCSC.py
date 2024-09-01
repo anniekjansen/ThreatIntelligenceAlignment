@@ -1,6 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import ast
+import re
 
 from DataLoaderSaver import DataLoaderSaver
 from DataAnalyzer import DataAnalyzer

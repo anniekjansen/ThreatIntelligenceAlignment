@@ -4,6 +4,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import ast
 import string
+import re
 
 class DataProcessor:
 
@@ -50,10 +51,30 @@ class DataProcessor:
             return valid_cve_id
         else:
             return None
-    
+        
+    def replace_values_ncsc(self, x, mapping):
+        if x is None:
+            return x 
+        result = []
+        for elem in x:
+            if elem in mapping:
+                result.append(mapping[elem])
+            else:
+                result.append(elem)
+        return result
+
+    def replace_values_apt(self, x, mapping):
+        if x is None:
+            return x
+        if x in mapping:
+            return mapping[x]
+        else:
+            return x 
+
     def mapping(self, data, security_dataset):
 
         product_mapping = {
+        'Air': 'Adobe AIR',
         '2007 Office System SP1/SP2': 'Microsoft Office',
         'Adobe Acrobat': 'Adobe Acrobat',
         'Adobe Acrobat 9 <9.5.5': 'Adobe Acrobat',
@@ -73,20 +94,39 @@ class DataProcessor:
         'Adobe Acrobat Reader 9 <9.5.5': 'Adobe Acrobat Reader',
         'Adobe Acrobat Reader X <10.1.7': 'Adobe Acrobat Reader',
         'Adobe Acrobat Reader XI <11.0.03': 'Adobe Acrobat Reader',
+        'Adobe Acrobat XI &lt;11.0.03': 'Adobe Acrobat',
+        'Adobe Acrobat X &lt;10.1.7': 'Adobe Acrobat',
+        'Adobe Acrobat 9 &lt;9.5.5': 'Adobe Acrobat',
+        'Adobe Reader XI &lt;11.0.03': 'Adobe Acrobat Reader',
+        'Adobe Reader X &lt;10.1.7': 'Adobe Acrobat Reader',
+        'Adobe Reader 9 &lt;9.5.5': 'Adobe Acrobat Reader',
         'Apple Java 1.6 for Mac OS X': 'Apple Java',
         'Apple Java 1.6 voor Mac OS X': 'Apple Java',
         'Apple MacBook Pro, iPad, iPhone': 'Apple',
         'Apple Safari': 'Apple',
         'Apple iPad': 'Apple',
+        'Apple IPad': 'Apple',
         'Apple iPhone': 'Apple',
+        'Apple IPhone': 'Apple',
         'Apple iPod Touch': 'Apple',
+        'Apple IPod Touch': 'Apple',
         'Atlassian Confluence': 'Atlassian Confluence',
         'Attachmate Reflection': 'Attachmate Reflection',
         'BEA Systems JRockit': 'BEA Systems JRockit',
         'Diverse IBM-producten (zie "Mogelijke oplossingen")': 'IBM',
+        # 'Diverse IBM-producten (zMicrosoft Internet Explorer &quot;Mogelijke oplossingen&quot;)': 'IBM',
+        'Diverse IBM-producten (zie &quot;Mogelijke oplossingen&quot;)': 'IBM',
+        'edge': 'Microsoft Edge',
         'Edge': 'Microsoft Edge',
+        'Excel': 'Microsoft Excel',
         'Google Chrome': 'Google Chrome',
+        'JScript': 'JScript',
+        'JRE': 'Oracle Java',
+        'Jre': 'Oracle Java',
+        'JDK': 'Oracle Java',
+        'Jdk': 'Oracle Java',
         'IBM Java': 'IBM Java',
+        'IBM Websphere Application Server': 'IBM WebSphere',
         'IBM WebSphere Application Server': 'IBM WebSphere',
         'IBM WebSphere MQ': 'IBM WebSphere',
         'IBM Websphere Message Broker': 'IBM WebSphere',
@@ -96,7 +136,7 @@ class DataProcessor:
         'Microsoft Biztalk Server': 'Microsoft Biztalk Server',
         'Microsoft Commerce Server': 'Microsoft Commerce Server',
         'Microsoft Edge': 'Microsoft Edge',
-        'Microsoft Excel Viewer': 'Microsoft Excel Viewer',
+        'Microsoft Excel Viewer': 'Microsoft Excel',
         'Microsoft Internet Explorer': 'Microsoft Internet Explorer',
         'Microsoft Lync': 'Microsoft Lync',
         'Microsoft Lync 2010': 'Microsoft Lync',
@@ -111,18 +151,20 @@ class DataProcessor:
         'Microsoft Office Converter Pack': 'Microsoft Office',
         'Microsoft Office Mac 2011 en 2016': 'Microsoft Office',
         'Microsoft Office Web Apps Server 2013': 'Microsoft Office',
-        'Microsoft Office Word Viewer': 'Microsoft Office Word Viewer',
-        'Microsoft Office for Mac': 'Microsoft Office for Mac',
-        'Microsoft Office for Mac 2011': 'Microsoft Office for Mac',
-        'Microsoft Office for Mac 2016': 'Microsoft Office for Mac',
+        'Microsoft Office Word Viewer': 'Microsoft Word',
+        'Microsoft Office for Mac': 'Microsoft Office',
+        'Microsoft Office for Mac 2011': 'Microsoft Office',
+        'Microsoft Office for Mac 2016': 'Microsoft Office',
         'Microsoft Outlook': 'Microsoft Outlook',
-        'Microsoft PowerPoint Viewer': 'Microsoft PowerPoint Viewer',
+        'Microsoft PowerPoint Viewer': 'Microsoft PowerPoint',
+        'Microsoft Powerpoint Viewer': 'Microsoft PowerPoint',
         'Microsoft PowerShell': 'Microsoft PowerShell',
         'Microsoft SQL Server 2005': 'Microsoft SQL Server',
         'Microsoft SQLServer': 'Microsoft SQL Server',
-        'Microsoft Sharepoint': 'Microsoft Sharepoint',
-        'Microsoft Sharepoint Server 2010, 2013': 'Microsoft Sharepoint',
-        'Microsoft Sharepoint Server 2013': 'Microsoft Sharepoint',
+        'Microsoft Sharepoint': 'Microsoft SharePoint',
+        'Microsoft SharePoint': 'Microsoft SharePoint',
+        'Microsoft Sharepoint Server 2010, 2013': 'Microsoft SharePoint',
+        'Microsoft Sharepoint Server 2013': 'Microsoft SharePoint',
         'Microsoft Silverlight': 'Microsoft Silverlight',
         'Microsoft Silverlight 5': 'Microsoft Silverlight',
         'Microsoft Visio Viewer': 'Microsoft Visio Viewer',
@@ -134,18 +176,22 @@ class DataProcessor:
         'Microsoft Works': 'Microsoft Office',
         'Microsoft XML Core Services': 'Microsoft Office',
         'Mozilla Firefox': 'Mozilla',
+        'Office': 'Microsoft Office',
         'Office 2003 SP3': 'Microsoft Office',
         'Office 2004 for Mac': 'Microsoft Office',
         'Office 2008 for Mac': 'Microsoft Office',
         'Office Compatibility Pack for Word Excel and PowerPoint 2007 File Formats SP1/SP2': 'Microsoft Office',
-        'Office Excel Viewer 2003 SP3': 'Microsoft Office',
-        'Office Excel Viewer SP1/SP2': 'Microsoft Office',
+        'Office Excel Viewer 2003 SP3': 'Microsoft Excel',
+        'Office Excel Viewer SP1/SP2': 'Microsoft Excel',
         'Office XP SP3': 'Microsoft Office',
         'Open XML File Converter for Mac': 'Microsoft Office',
         'Oracle Java': 'Oracle Java',
         'Oracle Java SE': 'Oracle Java',
         'Oracle OpenJDK': 'Oracle Java',
+        'PowerPoint': 'Microsoft PowerPoint',
+        'Powerpoint': 'Microsoft PowerPoint',
         'RARLAB WinRAR': 'RARLAB',
+        'RIM BlackBerry': 'RIM',
         'RIM Blackberry': 'RIM',
         'RIM Blackberry 7270': 'RIM',
         'RIM Blackberry Device Software': 'RIM',
@@ -156,6 +202,7 @@ class DataProcessor:
         'Sun Java Update': 'Oracle Java',
         'Windows': 'Microsoft Windows',
         'Windows OLE': 'Microsoft Windows',
+        'Word': 'Microsoft Word',
         'acrobat': 'Adobe Acrobat',
         'acrobat_reader': 'Adobe Acrobat Reader',
         'adobe_air': 'Adobe AIR',
@@ -170,8 +217,8 @@ class DataProcessor:
         'enterprise_linux_server_supplementary': 'Linux',
         'enterprise_linux_workstation': 'Linux',
         'enterprise_linux_workstation_supplementary': 'Linux',
-        'excel': 'Microsoft Excel Viewer',
-        'excel_viewer': 'Microsoft Excel Viewer',
+        'excel': 'Microsoft Excel',
+        'excel_viewer': 'Microsoft Excel',
         'flash_player': 'Adobe Flash Player',
         'flash_player_desktop_runtime': 'Adobe Flash Player',
         'flash_player_for_linux': 'Adobe Flash Player',
@@ -186,9 +233,13 @@ class DataProcessor:
         'office_web_apps': 'Microsoft Office',
         'office_web_apps_server': 'Microsoft Office',
         'office_web_components': 'Microsoft Office',
+        '2007 office system sp1/sp2': 'Microsoft Office',
+        'office 2003 sp3': 'Microsoft Office',
+        'office 2004 for mac': 'Microsoft Office',
+        'office 2008 for mac': 'Microsoft Office',
         'open_xml_file_format_converter': 'Microsoft Office',
         'opensuse': 'Linux',
-        'powerpoint': 'Microsoft PowerPoint Viewer',
+        'powerpoint': 'Microsoft PowerPoint',
         'server_message_block': 'Microsoft Windows',
         'sharepoint_enterprise_server': 'Microsoft SharePoint',
         'sharepoint_foundation': 'Microsoft SharePoint',
@@ -207,6 +258,8 @@ class DataProcessor:
         'windows_nt': 'Microsoft Windows',
         'windows_rt': 'Microsoft Windows',
         'windows_rt_8.1': 'Microsoft Windows',
+        'windows-nt': 'Microsoft Windows',
+        'windows_2000': 'Microsoft Windows',
         'windows_server_2003': 'Microsoft Windows',
         'windows_server_2008': 'Microsoft Windows',
         'windows_server_2012': 'Microsoft Windows',
@@ -229,6 +282,7 @@ class DataProcessor:
         'Apple Mac OS X Server': 'Apple Mac',
         'Apple iOS': 'Apple iOS',
         'Apple iOS < 10.0.1': 'Apple iOS',
+        'Apple iOS &lt; 10.0.1': 'Apple iOS',
         'BSD': 'BSD',
         'BlackBerry 10 OS': 'BlackBerry',
         'Canonical Ubuntu Linux': 'Ubuntu',
@@ -339,18 +393,42 @@ class DataProcessor:
         'x86': 'Windows'
         }
 
+        # if security_dataset == "APT":
+        #     combined_mapping = {**product_mapping, **os_mapping}
+        #     # combined_mapping = sorted(combined_mapping, key=len, reverse=True)
+        #     patterns = '|'.join(re.escape(key) for key in sorted(combined_mapping, key=len, reverse=True))
+        #     data['product'] = data['product'].str.replace(patterns, lambda m: combined_mapping[m.group()], regex=True)
+        #     data['os'] = data['os'].str.replace(patterns, lambda m: combined_mapping[m.group()], regex=True)
+        #     data['version'] = data['version'].apply(lambda x: self.extract_version_apt(x) if x else x)
+
         if security_dataset == "APT":
-            for key, value in product_mapping.items():
-                data['product'] = data['product'].replace(key, value)
-        
-            for key, value in product_mapping.items():
-                data['os'] = data['os'].replace(key, value)
-        
+            data["product"] = data["product"].apply(lambda x: self.replace_values_apt(x, product_mapping))
+            data["os"] = data["os"].apply(lambda x: self.replace_values_apt(x, os_mapping))
+            data['version'] = data['version'].apply(lambda x: self.extract_version_apt(x) if x else x)
+
         elif security_dataset == "NCSC":
-            for key, value in product_mapping.items():
-                data['Toepassingen'] = data['Toepassingen'].replace(key, value)
-        
-            for key, value in product_mapping.items():
-                data['Platformen'] = data['Platformen'].replace(key, value)
-        
+            data["Toepassingen"] = data["Toepassingen"].apply(lambda x: self.replace_values_ncsc(x, product_mapping))
+            data["Platformen"] = data["Platformen"].apply(lambda x: self.replace_values_ncsc(x, os_mapping))
+            data['Versies'] = data['Versies'].apply(lambda x: self.extract_version_ncsc(x) if x else x)
+
         return data
+    
+    def extract_version_ncsc(self, x):
+        pattern = r'(\d+(?=\.))'
+        versions = []
+        for item in x:
+            match = re.search(pattern, item)
+            if match:
+                version = match.group(0)
+                if version.isdigit():  # Check if the version is numeric
+                    versions.append(version)
+        return versions if versions else ["Unrecovered"]
+
+    def extract_version_apt(self, x):
+        pattern = r'(\d+(?=\.))'
+        match = re.search(pattern, x)
+        if match:
+            version = match.group(0)
+            if version.isdigit():  # Check if the version is numeric
+                return version
+        return "Unrecovered"

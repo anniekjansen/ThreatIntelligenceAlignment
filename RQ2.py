@@ -8,13 +8,16 @@ import os
 import glob
 import datetime
 import urllib.parse
+import psutil
+from urllib.parse import quote
 
 from DataLoaderSaver import DataLoaderSaver
 from DataAnalyzer import DataAnalyzer
+from DataProcessor import DataProcessor
 from URREFHelper import URREFHelper
 
 """ Load datasets """
-ncsc_data = DataLoaderSaver().load_dataset("NCSC", "engineered")
+ncsc_data = DataLoaderSaver().load_dataset("NCSC", "processed")
 apt_data = DataLoaderSaver().load_dataset("APT", "processed")
 # ncsc_classification_data = DataLoaderSaver().load_dataset("NCSC", "classification")
 
@@ -23,20 +26,17 @@ ncsc_data = URREFHelper().explode_columns(ncsc_data, ['CVE-ID'])
 # ncsc_classification_data = URREFHelper().explode_columns(ncsc_classification_data, ['CVE-ID'])
 
 """ Explode NCSC dataset so each product, os and version is its own instance """
-# ncsc_data = URREFHelper().explode_columns(ncsc_data, ['Platformen', 'Toepassingen', 'Versies'])
+ncsc_data = URREFHelper().explode_columns(ncsc_data, ['Platformen', 'Toepassingen', 'Versies'])
 
 """ Select only necessary columns and merge NCSC and APT datasets"""
-# ncsc = ncsc_data[["CVE-ID", "Toepassingen", "Versies", "Platformen"]]
-# apt = apt_data[["CVE-ID", "product", "version", "os"]]
-ncsc = ncsc_data[["CVE-ID", "Toepassingen", "Platformen"]]
-apt = apt_data[["CVE-ID", "product", "os"]]
+ncsc = ncsc_data[["CVE-ID", "Toepassingen", "Versies", "Platformen"]]
+apt = apt_data[["CVE-ID", "product", "version", "os"]]
 merged = pd.merge(ncsc, apt, on='CVE-ID')
 
 # merged = merged.head(10000)
 
 # print(len(merged))
 # merged.dropna(subset=["Toepassingen", "Versies", "Platformen"], how="all", inplace=True)
-merged.dropna(subset=["Toepassingen", "Platformen"], how="all", inplace=True)
 # print(len(merged))
 
 total_common_instances = len(merged)
@@ -46,19 +46,24 @@ print(f"Total common instances: {total_common_instances}")
 print(f"Unique common CVE-IDs: {unique_common_cve_ids}")
 
 """ check for normalization versions ??? """
-# version_ncsc = merged['Versies'].dropna().unique()
+#version_ncsc = merged['Versies'].dropna().unique()
 # version_apt = merged['version'].dropna().unique()
-# # print(version_ncsc)
-# # print(version_apt)
+# print(version_ncsc)
+# print(version_apt)
 # unique_versions = np.unique(np.concatenate((version_ncsc, version_apt)))
+
+# products_apt = merged["os"].dropna().unique()
+# products_ncsc = merged["Platformen"].dropna().unique()
+# unique_products = np.unique(np.concatenate((products_ncsc, products_apt)))
+
+# for i in unique_versions:
+#     print(i)
+
 
 """ Check for common values """
 # print((merged['Versies'] == merged['version']).sum())
 # print((merged['Toepassingen'] == merged['product']).sum())
 # print((merged['os'] == merged['Platformen']).sum())
-    
-
-# print(hello)
 
 # Find the maximum batch number
 max_batch = 0
@@ -95,14 +100,12 @@ URREFHelper().add_subclasses_to_thing(g, [TI.ThreatIntelligence])
 URREFHelper().add_subclasses_to_ti(g, [TI.Vulnerability])
 URREFHelper().add_subclasses_to_vulnerability(g, [TI.Product, TI.Version, TI.OS])
 
-# merged = merged.head(1000) # for testing
-
 """ Populate ontology with all instances of the merged dataset in batches """
 batch_size = 1000
 num_batches = (len(merged) + batch_size - 1) // batch_size
 start_batch = max_batch
 
-# merged = merged.head(1000) # for testing
+# merged = merged.head(5000) # for testing
 
 for i in range(start_batch, num_batches + 1):
     start = (i - 1) * batch_size
@@ -110,69 +113,70 @@ for i in range(start_batch, num_batches + 1):
     batch = merged.iloc[start:end]
 
     for index, row in batch.iterrows():
+        # row_number = start + index - batch.index[0] + 1
+
         CVE_ID = row['CVE-ID']
         TOEPASSING = row['Toepassingen']
         PRODUCT = row["product"]
-        # VERSIE = row["Versies"]
-        # VERSION = row["version"]
+        VERSIE = row["Versies"]
+        VERSION = row["version"]
         PLATFORM = row["Platformen"]
         OS = row["os"]
 
+        """ Vulnerability """
         vulnerability_uri = URIRef(f"http://example.org/urref/vulnerability/{CVE_ID}")
         g.add((vulnerability_uri, RDF.type, TI.Vulnerability))
         g.add((vulnerability_uri, TI.hasCVEID, Literal(row['CVE-ID'], datatype=XSD.string)))
 
+        total_application_affected_ncsc = f"{TOEPASSING} - {VERSIE} - {PLATFORM}"
+        total_application_affected_apt = f"{PRODUCT} - {VERSION} - {OS}"
+        total_application_affected_uri_ncsc = URREFHelper().add_total_application_affected_ncsc_to_graph(g, total_application_affected_ncsc, vulnerability_uri)
+        total_application_affected_uri_apt = URREFHelper().add_total_application_affected_apt_to_graph(g, total_application_affected_apt, vulnerability_uri)
+        
         """ Product """
-        toepassing_uri = URIRef(f"http://example.org/urref/product/{uuid.uuid4()}")
-        g.add((toepassing_uri, RDF.type, TI.Product))
-        g.add((toepassing_uri, TI.hasProductName, Literal(TOEPASSING, datatype=XSD.string)))
-        g.add((toepassing_uri, TI.fromDataset, Literal("NCSC", datatype=XSD.string)))
-        g.add((vulnerability_uri, URIRef("http://example.org/urref/affectsProduct"), toepassing_uri))
+        if TOEPASSING == None:
+            TOEPASSING = "Unknown"
+        if PRODUCT == None:
+            PRODUCT = "Unknown"
 
-        product_uri = URIRef(f"http://example.org/urref/product/{uuid.uuid4()}")
-        g.add((product_uri, RDF.type, TI.Product))
-        g.add((product_uri, TI.hasProductName, Literal(PRODUCT, datatype=XSD.string)))
-        g.add((product_uri, TI.fromDataset, Literal("APT", datatype=XSD.string)))
-        g.add((vulnerability_uri, URIRef("http://example.org/urref/affectsProduct"), product_uri))
+        product_uri_ncsc = URREFHelper().add_product_to_graph(g, TOEPASSING, "NCSC", vulnerability_uri)
+        product_uri_apt = URREFHelper().add_product_to_graph(g, PRODUCT, "APT", vulnerability_uri)
 
-        """ Version """
-        # versie_uri = URIRef(f"http://example.org/urref/version/{uuid.uuid4()}")
-        # g.add((versie_uri, RDF.type, TI.Version))
-        # g.add((versie_uri, TI.hasVersionName, Literal(VERSIE, datatype=XSD.string)))
-        # g.add((versie_uri, TI.fromDataset, Literal("NCSC", datatype=XSD.string)))
-        # g.add((product_uri, URIRef("http://example.org/urref/affectsVersion"), versie_uri))
+        """ VERSION """
+        if VERSIE == None:
+            VERSIE = "Unknown"
+        if VERSION == None:
+            VERSION = "Unknown"
 
-        # version_uri = URIRef(f"http://example.org/urref/version/{uuid.uuid4()}")
-        # g.add((version_uri, RDF.type, TI.Version))
-        # g.add((version_uri, TI.hasVersionName, Literal(VERSION, datatype=XSD.string)))
-        # g.add((version_uri, TI.fromDataset, Literal("APT", datatype=XSD.string)))
-        # g.add((product_uri, URIRef("http://example.org/urref/affectsVersion"), version_uri))
+        version_uri_ncsc = URREFHelper().add_version_to_graph(g, VERSIE, "NCSC", product_uri_ncsc)
+        version_uri_apt = URREFHelper().add_version_to_graph(g, VERSION, "APT", product_uri_apt)
 
         """ OS """
-        os_uri = URIRef(f"http://example.org/urref/os/{uuid.uuid4()}")
-        g.add((os_uri, RDF.type, TI.OS))
-        g.add((os_uri, TI.hasOSlabel, Literal(PLATFORM, datatype=XSD.string)))
-        g.add((os_uri, TI.fromDataset, Literal("NCSC", datatype=XSD.string)))
-        # g.add((version_uri, URIRef("http://example.org/urref/runsOn"), os_uri))
+        if PLATFORM == None:
+            PLATFORM = "Unknown"
+        if OS == None:
+            OS = "Unknown"
 
-        os_uri = URIRef(f"http://example.org/urref/os/{uuid.uuid4()}")
-        g.add((os_uri, RDF.type, TI.OS))
-        g.add((os_uri, TI.hasOSlabel, Literal(OS, datatype=XSD.string)))
-        g.add((os_uri, TI.fromDataset, Literal("APT", datatype=XSD.string)))
-        # g.add((version_uri, URIRef("http://example.org/urref/runsOn"), os_uri)) 
-
-        # print(row, "added from total rows:", len(merged))
+        os_uri_ncsc = URREFHelper().add_os_to_graph(g, PLATFORM, "NCSC", version_uri_ncsc)
+        os_uri_apt = URREFHelper().add_os_to_graph(g, OS, "APT", version_uri_apt)
 
     # Commit the batch to the graph
     g.commit()
 
     # Serialize and save the graph after each batch
-    batch_file = f"batches/output_urref_batch_{i+1}.owl"
-    g.serialize(destination=batch_file, format="xml")
-    print(f"Batch {i+1} of {num_batches} committed and serialized.")
+    # batch_file = f"batches/output_urref_batch_{i+1}.owl"
+    # g.serialize(destination=batch_file, format="xml")
+    # print(f"Batch {i+1} of {num_batches} committed and serialized.")
+    print(f"Batch {i+1} of {num_batches} committed.")
+
+    # Check memory usage again
+    # process = psutil.Process(os.getpid())
+    # mem_usage = process.memory_info().rss / (1024 * 1024)
+    # print(f"Memory usage after batch: {mem_usage:.2f} MB")
 
 # Rename the final file
 timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
 final_file = f'output_urref_{timestamp}.owl'
-os.rename(batch_file, final_file)
+g.serialize(destination=final_file, format="xml")
+# os.rename(batch_file, final_file)
 print(f"Final file saved as {final_file}")
