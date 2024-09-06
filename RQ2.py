@@ -19,25 +19,25 @@ from URREFHelper import URREFHelper
 """ Load datasets """
 ncsc_data = DataLoaderSaver().load_dataset("NCSC", "processed")
 apt_data = DataLoaderSaver().load_dataset("APT", "processed")
-# ncsc_classification_data = DataLoaderSaver().load_dataset("NCSC", "classification")
+ncsc_justification_data = DataLoaderSaver().load_dataset("NCSC", "classification")
 
 """ Explode NCSC datasets so each CVE-ID is its own instance """
 ncsc_data = URREFHelper().explode_columns(ncsc_data, ['CVE-ID'])
-# ncsc_classification_data = URREFHelper().explode_columns(ncsc_classification_data, ['CVE-ID'])
+ncsc_justification_data = URREFHelper().explode_columns(ncsc_justification_data, ['CVE-ID'])
 
 """ Explode NCSC dataset so each product, os and version is its own instance """
 ncsc_data = URREFHelper().explode_columns(ncsc_data, ['Platformen', 'Toepassingen', 'Versies'])
 
 """ Select only necessary columns and merge NCSC and APT datasets"""
-ncsc = ncsc_data[["CVE-ID", "Toepassingen", "Versies", "Platformen"]]
+ncsc = ncsc_data[["CVE-ID", "Toepassingen", "Versies", "Platformen", "Kans", "Schade"]]
 apt = apt_data[["CVE-ID", "product", "version", "os"]]
 merged = pd.merge(ncsc, apt, on='CVE-ID')
 
-# merged = merged.head(10000)
+ncsc_justification_data.rename(columns = {'Kans justified+important change':'Justified'}, inplace = True)
+ncsc_justification_data = ncsc_justification_data[['CVE-ID', 'Justified']]
 
-# print(len(merged))
-# merged.dropna(subset=["Toepassingen", "Versies", "Platformen"], how="all", inplace=True)
-# print(len(merged))
+justified_dict = ncsc_justification_data.set_index('CVE-ID')['Justified'].to_dict()
+merged['Justified'] = merged['CVE-ID'].map(justified_dict)
 
 total_common_instances = len(merged)
 unique_common_cve_ids = merged["CVE-ID"].nunique()
@@ -45,25 +45,7 @@ unique_common_cve_ids = merged["CVE-ID"].nunique()
 print(f"Total common instances: {total_common_instances}")
 print(f"Unique common CVE-IDs: {unique_common_cve_ids}")
 
-""" check for normalization versions ??? """
-#version_ncsc = merged['Versies'].dropna().unique()
-# version_apt = merged['version'].dropna().unique()
-# print(version_ncsc)
-# print(version_apt)
-# unique_versions = np.unique(np.concatenate((version_ncsc, version_apt)))
-
-# products_apt = merged["os"].dropna().unique()
-# products_ncsc = merged["Platformen"].dropna().unique()
-# unique_products = np.unique(np.concatenate((products_ncsc, products_apt)))
-
-# for i in unique_versions:
-#     print(i)
-
-
-""" Check for common values """
-# print((merged['Versies'] == merged['version']).sum())
-# print((merged['Toepassingen'] == merged['product']).sum())
-# print((merged['os'] == merged['Platformen']).sum())
+# merged = merged.head(10000) # for testing
 
 # Find the maximum batch number
 max_batch = 0
@@ -87,25 +69,23 @@ else:
     print("URREF graph loaded successfully!")
 
 """ Create URREF Namespace and bind this + other namespaces to the graph """
-TI = Namespace("http://example.org/urref/")
-# URREF= Namespace("http://eturwg.c4i.gmu.edu/files/ontologies/URREF.owl#")
+TI = Namespace("http://example.org/threatintelligence/")
+
 g.bind("ti", TI)
 g.bind("rdfs", RDFS)
-g.bind("owl", OWL)
 
 """ Create new threat intelligence classes, including hierarchy, and add them to the graph """
-URREFHelper().create_classes(g, ["ThreatIntelligence", "Vulnerability", "Product", "Version", "OS"])
+URREFHelper().create_classes(g, ["ThreatIntelligence", "Vulnerability", "Product", "Version", "OS", "Dataset", "Likelihood", "Impact", "Justification"])
 URREFHelper().assign_labels(g,["ThreatIntelligence"], ["Threat Intelligence"])
 URREFHelper().add_subclasses_to_thing(g, [TI.ThreatIntelligence])
-URREFHelper().add_subclasses_to_ti(g, [TI.Vulnerability])
+URREFHelper().add_subclasses_to_ti(g, [TI.Vulnerability, TI.Dataset, TI.Likelihood, TI.Impact, TI.Justification])
 URREFHelper().add_subclasses_to_vulnerability(g, [TI.Product, TI.Version, TI.OS])
+URREFHelper().add_predicates(g, ["fromDataset", "hasProductName", "affectsProduct", "affectsVersion", "runsOn", "hasLikelihood", "hasImpact", "hasDescriptionChange"])
 
 """ Populate ontology with all instances of the merged dataset in batches """
 batch_size = 1000
 num_batches = (len(merged) + batch_size - 1) // batch_size
 start_batch = max_batch
-
-# merged = merged.head(5000) # for testing
 
 for i in range(start_batch, num_batches + 1):
     start = (i - 1) * batch_size
@@ -113,9 +93,12 @@ for i in range(start_batch, num_batches + 1):
     batch = merged.iloc[start:end]
 
     for index, row in batch.iterrows():
-        # row_number = start + index - batch.index[0] + 1
-
         CVE_ID = row['CVE-ID']
+
+        LIKELIHOOD = row['Kans']
+        IMPACT = row['Schade']
+        JUSTIFICATION = row['Justified']
+
         TOEPASSING = row['Toepassingen']
         PRODUCT = row["product"]
         VERSIE = row["Versies"]
@@ -124,23 +107,27 @@ for i in range(start_batch, num_batches + 1):
         OS = row["os"]
 
         """ Vulnerability """
-        vulnerability_uri = URIRef(f"http://example.org/urref/vulnerability/{CVE_ID}")
-        g.add((vulnerability_uri, RDF.type, TI.Vulnerability))
+        vulnerability_uri = URIRef(f"http://example.org/threatintelligence/vulnerability/{CVE_ID}")
+        if (vulnerability_uri, RDF.type, TI.Vulnerability) not in g:
+            g.add((vulnerability_uri, RDF.type, TI.Vulnerability))
         g.add((vulnerability_uri, TI.hasCVEID, Literal(row['CVE-ID'], datatype=XSD.string)))
 
-        total_application_affected_ncsc = f"{TOEPASSING} - {VERSIE} - {PLATFORM}"
-        total_application_affected_apt = f"{PRODUCT} - {VERSION} - {OS}"
-        total_application_affected_uri_ncsc = URREFHelper().add_total_application_affected_ncsc_to_graph(g, total_application_affected_ncsc, vulnerability_uri)
-        total_application_affected_uri_apt = URREFHelper().add_total_application_affected_apt_to_graph(g, total_application_affected_apt, vulnerability_uri)
-        
+        """ Dataset """
+        NCSC_dataset_uri, APT_dataset_uri = URREFHelper().add_datasets_to_graph(g)
+
+        """ Likelihood, Impact, Justification """
+        likelihood_uri = URREFHelper().add_likelihood_to_graph(g, LIKELIHOOD, vulnerability_uri)
+        impact_uri = URREFHelper().add_impact_to_graph(g, IMPACT, vulnerability_uri)
+        justification_uri = URREFHelper().add_justification_to_graph(g, JUSTIFICATION, vulnerability_uri)
+
         """ Product """
         if TOEPASSING == None:
             TOEPASSING = "Unknown"
         if PRODUCT == None:
             PRODUCT = "Unknown"
 
-        product_uri_ncsc = URREFHelper().add_product_to_graph(g, TOEPASSING, "NCSC", vulnerability_uri)
-        product_uri_apt = URREFHelper().add_product_to_graph(g, PRODUCT, "APT", vulnerability_uri)
+        product_uri_ncsc = URREFHelper().add_product_to_graph(g, TOEPASSING, NCSC_dataset_uri, vulnerability_uri)
+        product_uri_apt = URREFHelper().add_product_to_graph(g, PRODUCT, APT_dataset_uri, vulnerability_uri)
 
         """ VERSION """
         if VERSIE == None:
@@ -148,8 +135,8 @@ for i in range(start_batch, num_batches + 1):
         if VERSION == None:
             VERSION = "Unknown"
 
-        version_uri_ncsc = URREFHelper().add_version_to_graph(g, VERSIE, "NCSC", product_uri_ncsc)
-        version_uri_apt = URREFHelper().add_version_to_graph(g, VERSION, "APT", product_uri_apt)
+        version_uri_ncsc = URREFHelper().add_version_to_graph(g, VERSIE, NCSC_dataset_uri, product_uri_ncsc)
+        version_uri_apt = URREFHelper().add_version_to_graph(g, VERSION, APT_dataset_uri, product_uri_apt)
 
         """ OS """
         if PLATFORM == None:
@@ -157,10 +144,9 @@ for i in range(start_batch, num_batches + 1):
         if OS == None:
             OS = "Unknown"
 
-        os_uri_ncsc = URREFHelper().add_os_to_graph(g, PLATFORM, "NCSC", version_uri_ncsc)
-        os_uri_apt = URREFHelper().add_os_to_graph(g, OS, "APT", version_uri_apt)
+        os_uri_ncsc = URREFHelper().add_os_to_graph(g, PLATFORM, NCSC_dataset_uri, version_uri_ncsc)
+        os_uri_apt = URREFHelper().add_os_to_graph(g, OS, APT_dataset_uri, version_uri_apt)
 
-    # Commit the batch to the graph
     g.commit()
 
     # Serialize and save the graph after each batch
@@ -168,11 +154,6 @@ for i in range(start_batch, num_batches + 1):
     # g.serialize(destination=batch_file, format="xml")
     # print(f"Batch {i+1} of {num_batches} committed and serialized.")
     print(f"Batch {i+1} of {num_batches} committed.")
-
-    # Check memory usage again
-    # process = psutil.Process(os.getpid())
-    # mem_usage = process.memory_info().rss / (1024 * 1024)
-    # print(f"Memory usage after batch: {mem_usage:.2f} MB")
 
 # Rename the final file
 timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")

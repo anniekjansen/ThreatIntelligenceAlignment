@@ -8,7 +8,6 @@ from ClassificationEngineering import ClassificationEngineering
 
 """ Set dataset to run (NCSC/APT) """
 security_dataset = "NCSC"
-# security_dataset = "APT"
 
 """ Load engineered dataset """
 data = DataLoaderSaver().load_dataset(security_dataset, "engineered")

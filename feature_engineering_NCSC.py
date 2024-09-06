@@ -28,19 +28,19 @@ for row in range(len(data)):
         data.loc[row,'Update'] = count + 1
         NCSC_ids.append(data.loc[row,'NCSC ID'])
 
-""" Create new columns, including the number of words and tokens of each Beschrijving """
-data['Words'] = pd.Series(dtype='int')
-data['Tokens'] = pd.Series(dtype='int')
+# """ Create new columns, including the number of words and tokens of each Beschrijving """
+# data['Words'] = pd.Series(dtype='int')
+# data['Tokens'] = pd.Series(dtype='int')
 
-for row in range(len(data)):
-    if type(data.loc[row,'Beschrijving']) == str:
-        data.loc[row,'Words'] = len(data.loc[row,'Beschrijving'].split())
-        data.loc[row,'Tokens'] = len(nltk.word_tokenize(data.loc[row,'Beschrijving']))
-    else:
-        data.loc[row,'Words'] = 0
-        data.loc[row,'Tokens'] = 0
+# for row in range(len(data)):
+#     if type(data.loc[row,'Beschrijving']) == str:
+#         data.loc[row,'Words'] = len(data.loc[row,'Beschrijving'].split())
+#         data.loc[row,'Tokens'] = len(nltk.word_tokenize(data.loc[row,'Beschrijving']))
+#     else:
+#         data.loc[row,'Words'] = 0
+#         data.loc[row,'Tokens'] = 0
 
-print(data.head(10))
+# print(data.head(10))
 
 """ Save intermediate dataset """
 DataLoaderSaver().save_dataset(data, security_dataset, "engineered")
