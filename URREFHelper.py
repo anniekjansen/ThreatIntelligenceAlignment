@@ -101,7 +101,7 @@ class URREFHelper:
             g.add((version_uri, RDF.type, self.TI.Version))
             g.add((version_uri, self.TI.hasVersionName, Literal(version_name, datatype=XSD.string)))
         g.add((version_uri, self.TI.fromDataset, dataset_uri))
-        g.add((product_uri, URIRef("http://example.org/threatintelligence/affectsVersion"), version_uri))
+        g.add((product_uri, self.TI.affectsVersion, version_uri))
         return version_uri
 
     def add_os_to_graph(self, g, os_label, dataset_uri, version_uri):
@@ -110,6 +110,6 @@ class URREFHelper:
             g.add((os_uri, RDF.type, self.TI.OS))
             g.add((os_uri, self.TI.hasOSlabel, Literal(os_label, datatype=XSD.string)))
         g.add((os_uri, self.TI.fromDataset, dataset_uri))
-        g.add((version_uri, URIRef("http://example.org/threatintelligence/runsOn"), os_uri))
+        g.add((version_uri, self.TI.runsOn, os_uri))
         return os_uri
         

@@ -29,7 +29,7 @@ ncsc_justification_data = URREFHelper().explode_columns(ncsc_justification_data,
 ncsc_data = URREFHelper().explode_columns(ncsc_data, ['Platformen', 'Toepassingen', 'Versies'])
 
 """ Select only necessary columns and merge NCSC and APT datasets"""
-ncsc = ncsc_data[["CVE-ID", "Toepassingen", "Versies", "Platformen", "Kans", "Schade"]]
+ncsc = ncsc_data[["CVE-ID", "Toepassingen", "Versies", "Platformen", "Kans"]]
 apt = apt_data[["CVE-ID", "product", "version", "os"]]
 merged = pd.merge(ncsc, apt, on='CVE-ID')
 
@@ -75,12 +75,12 @@ g.bind("ti", TI)
 g.bind("rdfs", RDFS)
 
 """ Create new threat intelligence classes, including hierarchy, and add them to the graph """
-URREFHelper().create_classes(g, ["ThreatIntelligence", "Vulnerability", "Product", "Version", "OS", "Dataset", "Likelihood", "Impact", "Justification"])
+URREFHelper().create_classes(g, ["ThreatIntelligence", "Vulnerability", "Product", "Version", "OS", "Dataset", "Likelihood", "Justification"])
 URREFHelper().assign_labels(g,["ThreatIntelligence"], ["Threat Intelligence"])
 URREFHelper().add_subclasses_to_thing(g, [TI.ThreatIntelligence])
-URREFHelper().add_subclasses_to_ti(g, [TI.Vulnerability, TI.Dataset, TI.Likelihood, TI.Impact, TI.Justification])
+URREFHelper().add_subclasses_to_ti(g, [TI.Vulnerability, TI.Dataset, TI.Likelihood, TI.Justification])
 URREFHelper().add_subclasses_to_vulnerability(g, [TI.Product, TI.Version, TI.OS])
-URREFHelper().add_predicates(g, ["fromDataset", "hasProductName", "affectsProduct", "affectsVersion", "runsOn", "hasLikelihood", "hasImpact", "hasDescriptionChange"])
+URREFHelper().add_predicates(g, ["fromDataset", "hasProductName", "affectsProduct", "affectsVersion", "runsOn", "hasLikelihood", "hasDescriptionChange"])
 
 """ Populate ontology with all instances of the merged dataset in batches """
 batch_size = 1000
@@ -96,7 +96,7 @@ for i in range(start_batch, num_batches + 1):
         CVE_ID = row['CVE-ID']
 
         LIKELIHOOD = row['Kans']
-        IMPACT = row['Schade']
+        # IMPACT = row['Schade']
         JUSTIFICATION = row['Justified']
 
         TOEPASSING = row['Toepassingen']
@@ -117,7 +117,7 @@ for i in range(start_batch, num_batches + 1):
 
         """ Likelihood, Impact, Justification """
         likelihood_uri = URREFHelper().add_likelihood_to_graph(g, LIKELIHOOD, vulnerability_uri)
-        impact_uri = URREFHelper().add_impact_to_graph(g, IMPACT, vulnerability_uri)
+        # impact_uri = URREFHelper().add_impact_to_graph(g, IMPACT, vulnerability_uri)
         justification_uri = URREFHelper().add_justification_to_graph(g, JUSTIFICATION, vulnerability_uri)
 
         """ Product """
