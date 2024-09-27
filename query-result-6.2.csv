@@ -1,0 +1,77 @@
+productName,vulnerabilityCount,likelihoodLabel
+Adobe Flash Player,21,High
+Microsoft Internet Explorer,18,High
+Microsoft Windows,18,Medium
+Unknown,18,Medium
+Microsoft Windows,15,High
+Unknown,12,High
+Microsoft Office,10,High
+Microsoft Internet Explorer,10,Medium
+Microsoft Office,10,Medium
+Adobe AIR,9,High
+Adobe Flash Player,7,Medium
+Google Chrome,6,High
+Adobe Acrobat,5,High
+Adobe Acrobat Reader,5,High
+Linux,4,High
+Microsoft SharePoint,4,High
+Microsoft Word,4,High
+Oracle Java,4,High
+Apple Java,3,High
+Attachmate Reflection,3,High
+IBM Java,3,High
+Mozilla,3,High
+Adobe Acrobat,3,Medium
+Adobe Acrobat Reader,3,Medium
+Apple,3,Medium
+Microsoft Word,3,Medium
+Macromedia Flash,2,High
+Microsoft Lync,2,High
+Microsoft Silverlight,2,High
+Skype,2,High
+Adobe AIR,2,Medium
+Apple Java,2,Medium
+Attachmate Reflection,2,Medium
+Google Chrome,2,Medium
+IBM Java,2,Medium
+Microsoft Edge,2,Medium
+Microsoft Excel,2,Medium
+Microsoft Lync,2,Medium
+Microsoft PowerPoint,2,Medium
+Microsoft SharePoint,2,Medium
+Mozilla,2,Medium
+Oracle Java,2,Medium
+Adobe Flash,1,High
+Adobe Reader,1,High
+Atlassian Confluence,1,High
+BEA Systems JRockit,1,High
+IBM,1,High
+IBM WebSphere,1,High
+Microsoft Biztalk Server,1,High
+Microsoft Commerce Server,1,High
+Microsoft Excel,1,High
+Microsoft Outlook,1,High
+Microsoft PowerPoint,1,High
+Microsoft SQL Server,1,High
+Microsoft Visio Viewer,1,High
+Microsoft Visual Basic,1,High
+Microsoft Visual Fox Pro,1,High
+Microsoft Visual Studio,1,High
+RARLAB,1,High
+RIM,1,High
+Microsoft Windows,1,Low
+Adobe Flash,1,Medium
+Adobe Reader,1,Medium
+Atlassian Confluence,1,Medium
+BEA Systems JRockit,1,Medium
+IBM WebSphere,1,Medium
+Linux,1,Medium
+Macromedia Flash,1,Medium
+Microsoft .NET,1,Medium
+Microsoft Outlook,1,Medium
+Microsoft PowerShell,1,Medium
+Microsoft Silverlight,1,Medium
+Microsoft Visio Viewer,1,Medium
+RARLAB,1,Medium
+RIM,1,Medium
+Skype,1,Medium

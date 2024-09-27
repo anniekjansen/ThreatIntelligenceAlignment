@@ -10,6 +10,7 @@ import datetime
 import urllib.parse
 import psutil
 from urllib.parse import quote
+import dask.dataframe as dd
 
 from DataLoaderSaver import DataLoaderSaver
 from DataAnalyzer import DataAnalyzer
@@ -33,11 +34,25 @@ ncsc = ncsc_data[["CVE-ID", "Toepassingen", "Versies", "Platformen", "Kans"]]
 apt = apt_data[["CVE-ID", "product", "version", "os"]]
 merged = pd.merge(ncsc, apt, on='CVE-ID')
 
-ncsc_justification_data.rename(columns = {'Kans justified+important change':'Justified'}, inplace = True)
-ncsc_justification_data = ncsc_justification_data[['CVE-ID', 'Justified']]
+ncsc_justification_data.rename(columns={
+    'Kans justified+important change': 'Justified',       
+    'Kans no change': 'No_change', 
+    'Kans unjustified change': 'Unjustified',
+    'Kans unimportant change': 'Unimportant'
+}, inplace=True)
+
+
+ncsc_justification_data = ncsc_justification_data[['CVE-ID', 'Justified', 'No_change', 'Unjustified', 'Unimportant']] 
 
 justified_dict = ncsc_justification_data.set_index('CVE-ID')['Justified'].to_dict()
+no_change_dict = ncsc_justification_data.set_index('CVE-ID')['No_change'].to_dict()
+unjustified_dict = ncsc_justification_data.set_index('CVE-ID')['Unjustified'].to_dict()
+unimportant_dict = ncsc_justification_data.set_index('CVE-ID')['Unimportant'].to_dict()
+
 merged['Justified'] = merged['CVE-ID'].map(justified_dict)
+merged['No_change'] = merged['CVE-ID'].map(no_change_dict)
+merged['Unjustified'] = merged['CVE-ID'].map(unjustified_dict)
+merged['Unimportant'] = merged['CVE-ID'].map(unimportant_dict)
 
 total_common_instances = len(merged)
 unique_common_cve_ids = merged["CVE-ID"].nunique()
@@ -45,7 +60,7 @@ unique_common_cve_ids = merged["CVE-ID"].nunique()
 print(f"Total common instances: {total_common_instances}")
 print(f"Unique common CVE-IDs: {unique_common_cve_ids}")
 
-# merged = merged.head(10000) # for testing
+# merged = merged.head(1000) # for testing
 
 # Find the maximum batch number
 max_batch = 0
@@ -80,7 +95,7 @@ URREFHelper().assign_labels(g,["ThreatIntelligence"], ["Threat Intelligence"])
 URREFHelper().add_subclasses_to_thing(g, [TI.ThreatIntelligence])
 URREFHelper().add_subclasses_to_ti(g, [TI.Vulnerability, TI.Dataset, TI.Likelihood, TI.Justification])
 URREFHelper().add_subclasses_to_vulnerability(g, [TI.Product, TI.Version, TI.OS])
-URREFHelper().add_predicates(g, ["fromDataset", "hasProductName", "affectsProduct", "affectsVersion", "runsOn", "hasLikelihood", "hasDescriptionChange"])
+URREFHelper().add_predicates(g, ["fromDataset", "hasProductName", "affectsProduct", "affectsVersion", "runsOn", "hasLikelihood", "hasDescriptionChange", "hasOSlabel", "hasVersionName"])
 
 """ Populate ontology with all instances of the merged dataset in batches """
 batch_size = 1000
@@ -97,7 +112,11 @@ for i in range(start_batch, num_batches + 1):
 
         LIKELIHOOD = row['Kans']
         # IMPACT = row['Schade']
-        JUSTIFICATION = row['Justified']
+
+        JUSTIFIED= row['Justified']
+        NOCHANGE = row['No_change']
+        UNJUSTIFIED = row['Unjustified']
+        UNIMPORTANT = row['Unimportant']
 
         TOEPASSING = row['Toepassingen']
         PRODUCT = row["product"]
@@ -118,7 +137,12 @@ for i in range(start_batch, num_batches + 1):
         """ Likelihood, Impact, Justification """
         likelihood_uri = URREFHelper().add_likelihood_to_graph(g, LIKELIHOOD, vulnerability_uri)
         # impact_uri = URREFHelper().add_impact_to_graph(g, IMPACT, vulnerability_uri)
-        justification_uri = URREFHelper().add_justification_to_graph(g, JUSTIFICATION, vulnerability_uri)
+        
+        justifications = [JUSTIFIED, NOCHANGE, UNJUSTIFIED, UNIMPORTANT]
+        justifications_label = ["Justified", "No_change", "Unjustified", "Unimportant"]
+        for j in range(0,len(justifications)):
+            if justifications[j] != 0:
+                justification_uri = URREFHelper().add_justification_to_graph(g, justifications_label[j], vulnerability_uri)
 
         """ Product """
         if TOEPASSING == None:

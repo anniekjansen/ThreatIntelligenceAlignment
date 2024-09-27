@@ -68,20 +68,16 @@ class URREFHelper:
             g.add((likelihood_uri, RDFS.label, Literal(likelihood_label, datatype=XSD.string)))
         g.add((vulnerability_uri, self.TI.hasLikelihood, likelihood_uri))
 
-    def add_impact_to_graph(self, g, impact_label, vulnerability_uri):
-        impact_uri = URIRef(f"http://example.org/threatintelligence/impact/{impact_label}")
-        if (impact_uri, RDF.type, self.TI.Impact) not in g:
-            g.add((impact_uri, RDF.type, self.TI.Impact))
-            g.add((impact_uri, RDFS.label, Literal(impact_label, datatype=XSD.string)))
-        g.add((vulnerability_uri, self.TI.hasImpact, impact_uri))
+    # def add_impact_to_graph(self, g, impact_label, vulnerability_uri):
+    #     impact_uri = URIRef(f"http://example.org/threatintelligence/impact/{impact_label}")
+    #     if (impact_uri, RDF.type, self.TI.Impact) not in g:
+    #         g.add((impact_uri, RDF.type, self.TI.Impact))
+    #         g.add((impact_uri, RDFS.label, Literal(impact_label, datatype=XSD.string)))
+    #     g.add((vulnerability_uri, self.TI.hasImpact, impact_uri))
 
     def add_justification_to_graph(self, g, justification, vulnerability_uri):
-        if justification == 0:
-            justification = "Non-Justified"
-        elif justification == 1:
-            justification = "Justified"
         justification_uri = URIRef(f"http://example.org/threatintelligence/justification/{justification}")
-        if (justification_uri, RDF.type, self.TI.Impact) not in g:
+        if (justification_uri, RDF.type, self.TI.Justification) not in g:
             g.add((justification_uri, RDF.type, self.TI.Justification))
             g.add((justification_uri, RDFS.label, Literal(justification, datatype=XSD.string)))
         g.add((vulnerability_uri, self.TI.hasDescriptionChange, justification_uri))

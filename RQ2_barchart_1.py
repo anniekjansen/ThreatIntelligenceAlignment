@@ -1,14 +1,24 @@
 import matplotlib.pyplot as plt
 
+# 1.1 = 86
+# 1.2 = 24
+# 1.3 = 45
+# 1.4 = 6
+# 1.5 = 24
+# 1.6 = 0
+# 1.7 = 24
+# 1.8 = 0 
+
 labels = ['1.1', '1.2', '1.3', '1.4', '1.5', '1.6', '1.7', '1.8']
-vulnerabilities = [86, 24, 45, 6, 27, 12, 35, 18]
+vulnerabilities = [86, 24, 45, 6, 24, 0, 24, 0]
 total_vulnerabilities = 86
 
 fig, ax = plt.subplots(figsize=(8*0.65, 6))
 bar_plot = ax.bar(labels, vulnerabilities)
 
 for bar, vulnerability in zip(bar_plot, vulnerabilities):
-    ax.text(bar.get_x() + bar.get_width()/2, bar.get_height()/2, f"{vulnerability}", ha='center', va='center')
+    if vulnerability != 0:
+        ax.text(bar.get_x() + bar.get_width()/2, bar.get_height()/2, f"{vulnerability}", ha='center', va='center')
 
 for bar, vulnerability in zip(bar_plot, vulnerabilities):
     percentage = (vulnerability / total_vulnerabilities) * 100
