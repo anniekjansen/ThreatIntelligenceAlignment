@@ -1,0 +1,17 @@
+PREFIX TI: <http://example.org/threatintelligence/>
+PREFIX RDF: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX RDFS: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?osLabelNCSC
+WHERE { 
+    ?NCSCdataset RDF:type TI:Dataset ;
+              RDFS:label "NCSC" .
+    ?osNCSC TI:fromDataset ?NCSCdataset .
+    ?osNCSC TI:hasOSlabel ?osLabelNCSC .
+    FILTER NOT EXISTS {
+        ?APTdataset RDF:type TI:Dataset ;
+                  RDFS:label "APT" .
+        ?osAPT TI:fromDataset ?APTdataset .
+        ?osAPT TI:hasOSlabel ?osLabelNCSC .
+    }
+}

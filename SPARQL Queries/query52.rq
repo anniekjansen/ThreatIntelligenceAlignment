@@ -1,0 +1,14 @@
+PREFIX TI: <http://example.org/threatintelligence/>
+PREFIX RDF: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX RDFS: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?product (COUNT(DISTINCT ?vulnerability) AS ?count)
+WHERE {
+  ?vulnerability RDF:type TI:Vulnerability .
+  ?vulnerability TI:affectsProduct ?product .
+  ?vulnerability TI:hasLikelihood ?likelihood .
+  ?likelihood RDFS:label "High" .
+}
+GROUP BY ?product
+ORDER BY DESC(?count)
+LIMIT 5

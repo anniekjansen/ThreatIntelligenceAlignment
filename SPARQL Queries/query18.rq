@@ -1,0 +1,41 @@
+PREFIX TI: <http://example.org/threatintelligence/>
+PREFIX RDF: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX RDFS: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT (COUNT(DISTINCT ?vulnerability) AS ?count)
+WHERE {
+  ?vulnerability RDF:type TI:Vulnerability .
+  
+  ?vulnerability TI:affectsProduct ?aptProduct .
+  ?aptProduct TI:fromDataset ?aptDataset . 
+  ?aptDataset RDF:type TI:Dataset ;
+              RDFS:label "APT" .
+
+  ?vulnerability TI:affectsProduct ?ncscProduct .
+  ?ncscProduct TI:fromDataset ?ncscDataset . 
+  ?ncscDataset RDF:type TI:Dataset ;
+               RDFS:label "NCSC" .
+
+  FILTER NOT EXISTS {
+    ?vulnerability TI:affectsProduct ?otherProduct .
+    ?otherProduct TI:fromDataset ?otherDataset . 
+    ?otherDataset RDF:type TI:Dataset ;
+                  RDFS:label ?otherDatasetLabel .
+    FILTER (?otherDatasetLabel NOT IN ("APT", "NCSC") ||
+           (EXISTS {
+              ?vulnerability TI:affectsProduct ?conflictingProduct .
+              ?conflictingProduct TI:fromDataset ?conflictingDataset . 
+              ?conflictingDataset RDF:type TI:Dataset ;
+                                  RDFS:label ?conflictingLabel .
+              FILTER (?conflictingLabel = ?otherDatasetLabel && ?otherProduct != ?conflictingProduct)
+           }))
+  }
+
+  FILTER NOT EXISTS {
+    ?vulnerability TI:affectsProduct ?product .
+    ?product TI:affectsVersion ?version1 .
+    ?product TI:affectsVersion ?version2 .
+    
+    FILTER (?version1 != ?version2)
+  }
+}

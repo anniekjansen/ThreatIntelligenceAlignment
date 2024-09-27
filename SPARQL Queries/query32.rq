@@ -1,0 +1,16 @@
+PREFIX TI: <http://example.org/threatintelligence/>
+PREFIX RDF: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX RDFS: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?osLabelNCSC (COUNT(DISTINCT ?vulnerabilityNCSC) AS ?vulnerabilityCountNCSC)
+WHERE { 
+    ?NCSCdataset RDF:type TI:Dataset ;
+              RDFS:label "NCSC" .
+    ?osNCSC TI:fromDataset ?NCSCdataset .
+    ?osNCSC TI:hasOSlabel ?osLabelNCSC .
+    ?vulnerabilityNCSC TI:affectsProduct ?productNCSC .
+    ?productNCSC TI:affectsVersion ?versionNCSC .
+    ?versionNCSC TI:runsOn ?osNCSC .
+}
+GROUP BY ?osLabelNCSC
+ORDER BY DESC(?vulnerabilityCountNCSC)

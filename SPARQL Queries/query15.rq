@@ -1,0 +1,64 @@
+PREFIX TI: <http://example.org/threatintelligence/>
+PREFIX RDF: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX RDFS: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT (COUNT(DISTINCT ?vulnerability) AS ?count)
+WHERE {
+  ?vulnerability RDF:type TI:Vulnerability .
+
+  ?vulnerability TI:affectsProduct ?aptProduct .
+  ?aptProduct TI:fromDataset ?aptDataset .
+  ?aptDataset RDF:type TI:Dataset ;
+              RDFS:label "APT" .
+
+  ?vulnerability TI:affectsProduct ?ncscProduct .
+  ?ncscProduct TI:fromDataset ?ncscDataset .
+  ?ncscDataset RDF:type TI:Dataset ;
+               RDFS:label "NCSC" .
+
+  FILTER NOT EXISTS {
+    ?vulnerability TI:affectsProduct ?product .
+    ?product TI:fromDataset ?dataset .
+    ?dataset RDF:type TI:Dataset ;
+             RDFS:label ?datasetLabel .
+
+    FILTER (?datasetLabel IN ("APT", "NCSC") &&
+           (
+             # Case 1: Conflicting product from the same dataset but different
+             EXISTS {
+               ?vulnerability TI:affectsProduct ?otherProduct .
+               ?otherProduct TI:fromDataset ?otherDataset .
+               ?otherDataset RDF:type TI:Dataset ;
+                             RDFS:label ?otherDatasetLabel .
+               FILTER (?otherDatasetLabel = ?datasetLabel && ?product != ?otherProduct)
+             }
+             ||
+             # Case 2: Products from APT dataset but not the same as the main APT product
+             EXISTS {
+               ?vulnerability TI:affectsProduct ?otherAptProduct .
+               ?otherAptProduct TI:fromDataset ?otherAptDataset .
+               ?otherAptDataset RDF:type TI:Dataset ;
+                                RDFS:label "APT" .
+               FILTER (?otherAptProduct != ?aptProduct)
+             }
+             ||
+             # Case 3: Products from NCSC dataset but not the same as the main NCSC product
+             EXISTS {
+               ?vulnerability TI:affectsProduct ?otherNcscProduct .
+               ?otherNcscProduct TI:fromDataset ?otherNcscDataset .
+               ?otherNcscDataset RDF:type TI:Dataset ;
+                                  RDFS:label "NCSC" .
+               FILTER (?otherNcscProduct != ?ncscProduct)
+             }
+           )
+    )
+  }
+
+  FILTER EXISTS {
+    ?aptProduct TI:affectsVersion ?aptVersion .
+    ?aptVersion TI:runsOn ?os .
+
+    ?ncscProduct TI:affectsVersion ?ncscVersion .
+    ?ncscVersion TI:runsOn ?os .
+  }
+}

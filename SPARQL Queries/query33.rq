@@ -1,0 +1,16 @@
+PREFIX TI: <http://example.org/threatintelligence/>
+PREFIX RDF: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX RDFS: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?osLabelAPT (COUNT(DISTINCT ?vulnerabilityAPT) AS ?vulnerabilityCountAPT)
+WHERE { 
+    ?APTdataset RDF:type TI:Dataset ;
+              RDFS:label "APT" .
+    ?osAPT TI:fromDataset ?APTdataset .
+    ?osAPT TI:hasOSlabel ?osLabelAPT .
+    ?vulnerabilityAPT TI:affectsProduct ?productAPT .
+    ?productAPT TI:affectsVersion ?versionAPT .
+    ?versionAPT TI:runsOn ?osAPT .
+}
+GROUP BY ?osLabelAPT
+ORDER BY DESC(?vulnerabilityCountAPT)

@@ -1,0 +1,20 @@
+PREFIX TI: <http://example.org/threatintelligence/>
+PREFIX RDF: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX RDFS: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT (COUNT(DISTINCT ?vulnerability) AS ?count)
+WHERE {
+  ?vulnerability RDF:type TI:Vulnerability .
+  
+  ?vulnerability TI:affectsProduct ?aptProduct .
+  ?aptProduct TI:fromDataset ?aptDataset .
+  ?aptDataset RDF:type TI:Dataset ;
+             RDFS:label "APT" .
+  
+  ?vulnerability TI:affectsProduct ?ncscProduct .
+  ?ncscProduct TI:fromDataset ?ncscDataset .
+  ?ncscDataset RDF:type TI:Dataset ;
+             RDFS:label "NCSC" .
+  
+  FILTER(?aptProduct = ?ncscProduct)
+}
