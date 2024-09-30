@@ -2,13 +2,20 @@ PREFIX TI: <http://example.org/threatintelligence/>
 PREFIX RDF: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX RDFS: <http://www.w3.org/2000/01/rdf-schema#>
 
-SELECT ?product (COUNT(DISTINCT ?vulnerability) AS ?count)
+SELECT ?product 
+       (COUNT(DISTINCT ?justifiedVulnerability) AS ?justifiedCount)
+       (COUNT(DISTINCT ?vulnerability) AS ?totalVulnerabilities)
+       ((COUNT(DISTINCT ?justifiedVulnerability) * 100.0) / COUNT(DISTINCT ?vulnerability) AS ?justifiedPercentage)
 WHERE {
   ?vulnerability RDF:type TI:Vulnerability .
   ?vulnerability TI:affectsProduct ?product .
-  ?vulnerability TI:hasDescriptionChange ?justification .
-  ?justification RDFS:label "Justified" .
+  
+  OPTIONAL {
+    ?justifiedVulnerability TI:affectsProduct ?product .
+    ?justifiedVulnerability TI:hasDescriptionChange ?justification .
+    ?justification RDFS:label ?label .
+    FILTER(?label IN ("Justified")) .
+  }
 }
 GROUP BY ?product
-ORDER BY DESC(?count)
-LIMIT 5
+ORDER BY DESC(?justifiedCount)

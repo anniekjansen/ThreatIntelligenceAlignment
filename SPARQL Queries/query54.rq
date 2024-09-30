@@ -1,0 +1,24 @@
+PREFIX TI: <http://example.org/threatintelligence/>
+PREFIX RDF: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX RDFS: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?justificationType 
+       (COUNT(DISTINCT ?highLikelihoodVulnerability) AS ?highLikelihoodCount) 
+       (COUNT(DISTINCT ?totalVulnerability) AS ?totalCount)
+       ((COUNT(DISTINCT ?highLikelihoodVulnerability) * 100.0) / COUNT(DISTINCT ?totalVulnerability) AS ?percentage)
+WHERE {
+  ?vulnerability RDF:type TI:Vulnerability .
+
+  OPTIONAL {
+    ?vulnerability TI:hasLikelihood ?likelihood .
+    ?likelihood RDFS:label "High" .
+    BIND(?vulnerability AS ?highLikelihoodVulnerability)
+  }
+    
+  ?vulnerability TI:hasDescriptionChange ?justification .
+  ?justification RDFS:label ?justificationType .
+    
+  BIND(?vulnerability AS ?totalVulnerability)
+}
+GROUP BY ?justificationType
+ORDER BY DESC(?highLikelihoodCount)
