@@ -1,4 +1,4 @@
-productName,vulnerabilityCount,likelihoodLabel
+productName,count,likelihoodLabel
 Adobe Flash Player,21,High
 Microsoft Internet Explorer,18,High
 Microsoft Windows,18,Medium

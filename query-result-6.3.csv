@@ -1,0 +1,10 @@
+justificationType,likelihoodType,count
+Justified,High,10
+Justified,Medium,7
+No_change,High,30
+No_change,Medium,19
+Unimportant,High,23
+Unimportant,Low,1
+Unimportant,Medium,18
+Unjustified,High,9
+Unjustified,Medium,6
