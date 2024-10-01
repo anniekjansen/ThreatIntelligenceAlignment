@@ -1,14 +1,5 @@
 import matplotlib.pyplot as plt
 
-# 1.1 = 86
-# 1.2 = 24
-# 1.3 = 45
-# 1.4 = 6
-# 1.5 = 24
-# 1.6 = 0
-# 1.7 = 24
-# 1.8 = 0 
-
 labels = ['1.1', '1.2', '1.3', '1.4', '1.5', '1.6', '1.7', '1.8']
 vulnerabilities = [86, 24, 45, 6, 24, 0, 24, 0]
 total_vulnerabilities = 86
