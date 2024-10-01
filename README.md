@@ -12,6 +12,7 @@ Classes:
 * DataProcessor.py: functions to preprocess the dataset
 * ClassificationEngineering.py: functions to create new classification columns
 * URREFHelper.py: functions to populate the URREF ontology
+* ChartCreator.py: functions to create different charts.
 * CompAnalyzer.py: functions to perform the comparative risk analyses
 
 Pipeline:
@@ -21,9 +22,13 @@ Pipeline:
 * processing_APT.py: pre-processing of the APT dataset
 * feature_engineering_NCSC.py: engineering of new attributes to the NCSC dataset
 * classification_engineering.py: engineering of a new dataframe including four classification columns for the change Justification in NCSC descriptions
-* RQ1.py: temporal analyses of threats
-* RQ2.py: ontological analyses of threats
+* RQ1.py: temporal analysis of threats
+* RQ2.py: ontological analysis of threats
+* RQ2_charts.py: charts for ontological analysis
 * RQ2_comp_analysis.py: comparative risk analyses
+
+Further directories:
+* SPARQL Queries: SPARQL queries for ontological analysis, including results for comparative risk analyses
 
 
 Extra files (excluded from final pipeline):

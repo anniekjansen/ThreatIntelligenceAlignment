@@ -1,7 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib_venn import venn2
 
-class BarChartCreator:
+class ChartCreator:
 
     def create_bar_chart(self, labels, vulnerabilities, title, xlabel, ylabel, total_vulnerabilities=None, color=None, fontsize=10):
         fig, ax = plt.subplots(figsize=(8*0.65, 6))
@@ -61,4 +62,34 @@ class BarChartCreator:
         ax.set_ylabel(ylabel)
 
         ax.set_ylim(0, max(vulnerabilities) * 1.1)
+        plt.show()
+    
+    def create_venn_diagram(self, set_a, set_b, intersection):
+        set_a.update(intersection)
+        set_b.update(intersection)
+        set_a_unique = set_a - set_b
+        set_b_unique = set_b - set_a
+
+        plt.figure(figsize=(10, 8))
+        equal_size = max(len(set_a_unique), len(set_b_unique), len(intersection))
+
+        v = venn2(subsets=(equal_size, equal_size, len(intersection)), 
+                set_labels=('NCSC', 'APT'), alpha=0.5)
+
+        v.get_patch_by_id('10').set_facecolor('#1f77b4')
+        v.get_patch_by_id('01').set_facecolor('#007acc')
+        v.get_patch_by_id('11').set_facecolor('skyblue') 
+
+        label = v.get_label_by_id('10')
+        label.set_text('\n'.join(set_a_unique))
+        label.set_fontsize(9)
+
+        label = v.get_label_by_id('01')
+        label.set_text('\n'.join(set_b_unique))
+        label.set_fontsize(9)
+
+        label = v.get_label_by_id('11')
+        label.set_text('\n'.join(intersection))
+        label.set_fontsize(9)
+
         plt.show()

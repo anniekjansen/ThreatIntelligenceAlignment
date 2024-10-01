@@ -2,7 +2,6 @@ from rdflib import Graph, URIRef, Literal, Namespace
 from rdflib.namespace import RDF, XSD, RDFS, OWL
 from urllib.parse import quote
 import pandas as pd
-import uuid
 
 class URREFHelper:
 
@@ -11,10 +10,6 @@ class URREFHelper:
     def create_classes(self, g, class_names):
         for name in class_names:
             g.add((self.TI[name], RDF.type, RDFS.Class))
-    
-    # def assign_labels(self, g, class_names, labels):
-    #     for name, label in zip(class_names, labels):
-    #         g.add((self.TI[name], RDFS.label, Literal(label)))
 
     def assign_labels(self, g, class_names, labels):
         for name, label in zip(class_names, labels):
