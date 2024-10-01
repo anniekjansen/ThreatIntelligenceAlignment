@@ -12,6 +12,7 @@ Classes:
 * DataProcessor.py: functions to preprocess the dataset
 * ClassificationEngineering.py: functions to create new classification columns
 * URREFHelper.py: functions to populate the URREF ontology
+* CompAnalyzer.py: functions to perform the comparative risk analyses
 
 Pipeline:
 * exploration_NCSC.py: exploratory data analysis of the NCSC dataset
@@ -21,7 +22,8 @@ Pipeline:
 * feature_engineering_NCSC.py: engineering of new attributes to the NCSC dataset
 * classification_engineering.py: engineering of a new dataframe including four classification columns for the change Justification in NCSC descriptions
 * RQ1.py: temporal analyses of threats
-* URREFmapping.py: mapping the datasets to the URREF ontology
+* RQ2.py: ontological analyses of threats
+* RQ2_comp_analysis.py: comparative risk analyses
 
 
 Extra files (excluded from final pipeline):
