@@ -1,4 +1,4 @@
-# Code for Thesis
+# Repository for Thesis
 
 MSc Artificial Intelligence
 
