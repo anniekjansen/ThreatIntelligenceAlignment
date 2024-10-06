@@ -21,4 +21,4 @@ WHERE {
   BIND(?vulnerability AS ?totalVulnerability)
 }
 GROUP BY ?justificationType
-ORDER BY DESC(?highLikelihoodCount)
+ORDER BY DESC(?percentage) DESC(?highLikelihoodCount)

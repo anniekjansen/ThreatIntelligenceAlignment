@@ -18,4 +18,4 @@ WHERE {
   }
 }
 GROUP BY ?product
-ORDER BY DESC(?highLikelihoodCount)
+ORDER BY DESC(?highLikelihoodPercentage) DESC(?highLikelihoodCount)
