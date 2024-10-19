@@ -1,7 +1,5 @@
 import pandas as pd
 import matplotlib.pyplot as plt
-import ast
-import re
 
 from DataLoaderSaver import DataLoaderSaver
 from DataAnalyzer import DataAnalyzer
@@ -42,7 +40,6 @@ ax.set_ylabel('Count')
 ax.legend()
 ax.grid(True)
 
-# plt.savefig('lineplot_Uitgiftedatum.png')
 plt.show()
 
 data = data.reset_index()

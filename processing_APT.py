@@ -1,10 +1,8 @@
-import pandas as pd
 import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
 
 from DataLoaderSaver import DataLoaderSaver
-from DataAnalyzer import DataAnalyzer
 from DataProcessor import DataProcessor
+from DataAnalyzer import DataAnalyzer
 
 """ Set dataset to run """
 security_dataset = "APT"
@@ -12,7 +10,6 @@ security_dataset = "APT"
 """ Load initial dataset """
 data = DataLoaderSaver().load_dataset(security_dataset, "initial")
 data = data.reset_index()
-# print(data.head())
 
 """ Data Selection """
 
@@ -52,7 +49,6 @@ ax.set_ylabel('Count')
 ax.legend()
 ax.grid(True)
 
-# plt.savefig('lineplotTimeAPT.png')
 plt.show()
 
 """ Clean input to None if applicable """

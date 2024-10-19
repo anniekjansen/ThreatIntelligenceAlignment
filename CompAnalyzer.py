@@ -1,4 +1,3 @@
-import pandas as pd
 import scipy.stats as stats
 import numpy as np
 import matplotlib.pyplot as plt
@@ -15,9 +14,8 @@ class CompAnalyzer:
                 c = contingency_table.loc[index_name].sum() - a
                 d = contingency_table.loc[contingency_table.index[contingency_table.index != index_name][0]].sum() - b
                 
-                # Check for division by zero
                 if c == 0 or d == 0:
-                    odds_ratio = np.nan  # or some other default value
+                    odds_ratio = np.nan 
                 else:
                     odds_ratio = (a / c) / (b / d)
                 
@@ -32,9 +30,8 @@ class CompAnalyzer:
                 c = contingency_table.loc[:, index_name].sum() - a
                 d = contingency_table.loc[:, column_name].sum() - b
                 
-                # Check for division by zero
                 if c == 0 or d == 0:
-                    odds_ratio = np.nan  # or some other default value
+                    odds_ratio = np.nan
                 else:
                     odds_ratio = (a / c) / (b / d)
                 
@@ -51,13 +48,6 @@ class CompAnalyzer:
     def print_results(self, odds_ratios, chi2, p_chi2, dof):
         print("\nOdds Ratios:")
         print(odds_ratios)
-        
-        print("\nTop 5 Highest Odds Ratio:")
-        print(pd.DataFrame(list(odds_ratios.items()), columns=['Column', 'Odds_Ratio']).sort_values(by='Odds_Ratio', ascending=False).dropna().head(5).reset_index(drop=True))
-        
-        print("\nTop 5 Lowest Odds Ratio:")
-        print(pd.DataFrame(list(odds_ratios.items()), columns=['Column', 'Odds_Ratio']).sort_values(by='Odds_Ratio', ascending=True).dropna().head(5).reset_index(drop=True))
-        
         print("\nChi-Squared Test Results:")
         print("Chi-Squared Statistic:", chi2)
         print("P-Value for Chi-Squared:", p_chi2)

@@ -32,11 +32,9 @@ vulnerabilities = [1, 50, 63]
 ChartCreator().create_bar_chart_with_custom_width(labels, vulnerabilities, 'Likelihood Analysis', 'Likelihood', 'Number of Vulnerabilities', 0.55, 12)
 
 """ Venn Diagram """
-set_a = {    "UNIX", "Red Hat", "FreeBSD", "SUSE", "BSD", "BlackBerry", "Ubuntu", 
+set_a = {    "Apple", "UNIX", "Red Hat", "FreeBSD", "SUSE", "BSD", "BlackBerry", "Ubuntu", 
     "HP-UX", "OpenVMS", "IBM AIX", "IBM z/OS", "Red Hat Enterprise Linux", "Windows 8"}
 set_b = {"professional x64", "Windows Server 2019"}
-
-# Define the intersection
 intersection = {"Android", "Apple Mac", "Apple iOS", "Chrome OS", "Linux", "Solaris", 
     "Unknown", "Windows", "Windows 10", "Windows 7", "Windows 8.1", "Windows Server", 
     "Windows Server 2003", "Windows Server 2008", "Windows Server 2012", 

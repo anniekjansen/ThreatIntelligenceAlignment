@@ -1,16 +1,9 @@
-from rdflib import Graph, URIRef, Literal, Namespace, BNode
+from rdflib import Graph, URIRef, Literal, Namespace
 from rdflib.namespace import RDF, XSD, RDFS, OWL
 import pandas as pd
-import string
-import uuid
-import numpy as np
 import os
-import glob
 import datetime
-import urllib.parse
-import psutil
 from urllib.parse import quote
-import dask.dataframe as dd
 
 from DataLoaderSaver import DataLoaderSaver
 from DataAnalyzer import DataAnalyzer
@@ -41,7 +34,6 @@ ncsc_justification_data.rename(columns={
     'Kans unimportant change': 'Unimportant'
 }, inplace=True)
 
-
 ncsc_justification_data = ncsc_justification_data[['CVE-ID', 'Justified', 'No_change', 'Unjustified', 'Unimportant']] 
 
 justified_dict = ncsc_justification_data.set_index('CVE-ID')['Justified'].to_dict()
@@ -62,26 +54,9 @@ print(f"Unique common CVE-IDs: {unique_common_cve_ids}")
 
 # merged = merged.head(1000) # for testing
 
-# Find the maximum batch number
-max_batch = 0
-if not os.path.exists('batches'):
-    os.makedirs('batches')
-
-for file in os.listdir("batches"):
-    if file.startswith("output_urref_batch_") and file.endswith(".owl"):
-        batch_num = int(file.split("_")[-1].split(".")[0])
-        if batch_num > max_batch:
-            max_batch = batch_num
-
-# Load and parse the maximum batch
-batch_file = f"batches/output_urref_batch_{max_batch}.owl"
 g = Graph()
-if os.path.exists(batch_file):
-    g.parse(batch_file, format="xml")
-    print(f"Graph loaded from latest batch: {batch_file}")
-else:
-    g.parse("URREF.owl", format="xml")
-    print("URREF graph loaded successfully!")
+g.parse("URREF.owl", format="xml")
+print("URREF graph loaded successfully!")
 
 """ Create URREF Namespace and bind this + other namespaces to the graph """
 TI = Namespace("http://example.org/threatintelligence/")
@@ -97,27 +72,32 @@ URREFHelper().add_subclasses_to_ti(g, [TI.Vulnerability, TI.Dataset, TI.Likeliho
 URREFHelper().add_subclasses_to_vulnerability(g, [TI.Product, TI.Version, TI.OS])
 URREFHelper().add_predicates(g, ["fromDataset", "hasProductName", "affectsProduct", "affectsVersion", "runsOn", "hasLikelihood", "hasDescriptionChange", "hasOSlabel", "hasVersionName"])
 
+g.add((TI.fromDataset, RDF.type, OWL.ObjectProperty))
+g.add((TI.hasProductName, RDF.type, OWL.ObjectProperty))
+g.add((TI.affectsProduct, RDF.type, OWL.ObjectProperty))
+g.add((TI.affectsVersion, RDF.type, OWL.ObjectProperty))
+g.add((TI.runsOn, RDF.type, OWL.ObjectProperty))
+g.add((TI.hasLikelihood, RDF.type, OWL.ObjectProperty))
+g.add((TI.hasDescriptionChange, RDF.type, OWL.ObjectProperty))
+g.add((TI.hasOSlabel, RDF.type, OWL.ObjectProperty))
+g.add((TI.hasVersionName, RDF.type, OWL.ObjectProperty))
+
 """ Populate ontology with all instances of the merged dataset in batches """
 batch_size = 1000
 num_batches = (len(merged) + batch_size - 1) // batch_size
-start_batch = max_batch
 
-for i in range(start_batch, num_batches + 1):
+for i in range(0, num_batches + 1):
     start = (i - 1) * batch_size
     end = i * batch_size
     batch = merged.iloc[start:end]
 
     for index, row in batch.iterrows():
         CVE_ID = row['CVE-ID']
-
         LIKELIHOOD = row['Kans']
-        # IMPACT = row['Schade']
-
         JUSTIFIED= row['Justified']
         NOCHANGE = row['No_change']
         UNJUSTIFIED = row['Unjustified']
         UNIMPORTANT = row['Unimportant']
-
         TOEPASSING = row['Toepassingen']
         PRODUCT = row["product"]
         VERSIE = row["Versies"]
@@ -134,10 +114,8 @@ for i in range(start_batch, num_batches + 1):
         """ Dataset """
         NCSC_dataset_uri, APT_dataset_uri = URREFHelper().add_datasets_to_graph(g)
 
-        """ Likelihood, Impact, Justification """
-        likelihood_uri = URREFHelper().add_likelihood_to_graph(g, LIKELIHOOD, vulnerability_uri)
-        # impact_uri = URREFHelper().add_impact_to_graph(g, IMPACT, vulnerability_uri)
-        
+        """ Likelihood & Justification """
+        likelihood_uri = URREFHelper().add_likelihood_to_graph(g, LIKELIHOOD, vulnerability_uri)        
         justifications = [JUSTIFIED, NOCHANGE, UNJUSTIFIED, UNIMPORTANT]
         justifications_label = ["Justified", "No_change", "Unjustified", "Unimportant"]
         for j in range(0,len(justifications)):
@@ -173,15 +151,9 @@ for i in range(start_batch, num_batches + 1):
 
     g.commit()
 
-    # Serialize and save the graph after each batch
-    # batch_file = f"batches/output_urref_batch_{i+1}.owl"
-    # g.serialize(destination=batch_file, format="xml")
-    # print(f"Batch {i+1} of {num_batches} committed and serialized.")
     print(f"Batch {i+1} of {num_batches} committed.")
 
-# Rename the final file
 timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
 final_file = f'output_urref_{timestamp}.owl'
 g.serialize(destination=final_file, format="xml")
-# os.rename(batch_file, final_file)
-print(f"Final file saved as {final_file}")
+print(f"File saved as {final_file}")

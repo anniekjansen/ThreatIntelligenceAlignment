@@ -21,7 +21,5 @@ class DataLoaderSaver:
     def save_dataset(self, data, dataset_prefix, dataset_suffix, seperator=","):
         data_path = Path("./intermediate_datafiles/")
         dataset = f"{dataset_prefix}_advisories_{dataset_suffix}.json"
-
-        # data.to_csv(data_path / dataset, sep=seperator)
         data.to_json(data_path / dataset, orient='records', date_format='iso')
         print("Dataset saved succesfully!")

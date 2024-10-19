@@ -1,9 +1,6 @@
-import pandas as pd
-import matplotlib.pyplot as plt
 
 from DataLoaderSaver import DataLoaderSaver
 from DataAnalyzer import DataAnalyzer
-from DataProcessor import DataProcessor
 
 """ Set dataset to run """
 security_dataset = "APT"

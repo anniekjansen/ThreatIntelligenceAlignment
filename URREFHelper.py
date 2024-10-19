@@ -1,7 +1,6 @@
-from rdflib import Graph, URIRef, Literal, Namespace
+from rdflib import URIRef, Literal, Namespace
 from rdflib.namespace import RDF, XSD, RDFS, OWL
 from urllib.parse import quote
-import pandas as pd
 
 class URREFHelper:
 
@@ -35,6 +34,7 @@ class URREFHelper:
     def add_predicates(self, g, predicate_names):
         for name in predicate_names:
             setattr(self.TI, name, self.TI[name])
+            g.add((self.TI[name], RDF.type, OWL.ObjectProperty))
 
     def explode_columns(self, data, column_names):
         for col in column_names:
@@ -62,13 +62,6 @@ class URREFHelper:
             g.add((likelihood_uri, RDF.type, self.TI.Likelihood))
             g.add((likelihood_uri, RDFS.label, Literal(likelihood_label, datatype=XSD.string)))
         g.add((vulnerability_uri, self.TI.hasLikelihood, likelihood_uri))
-
-    # def add_impact_to_graph(self, g, impact_label, vulnerability_uri):
-    #     impact_uri = URIRef(f"http://example.org/threatintelligence/impact/{impact_label}")
-    #     if (impact_uri, RDF.type, self.TI.Impact) not in g:
-    #         g.add((impact_uri, RDF.type, self.TI.Impact))
-    #         g.add((impact_uri, RDFS.label, Literal(impact_label, datatype=XSD.string)))
-    #     g.add((vulnerability_uri, self.TI.hasImpact, impact_uri))
 
     def add_justification_to_graph(self, g, justification, vulnerability_uri):
         justification_uri = URIRef(f"http://example.org/threatintelligence/justification/{justification}")

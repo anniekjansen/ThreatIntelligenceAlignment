@@ -3,19 +3,19 @@ PREFIX RDF: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX RDFS: <http://www.w3.org/2000/01/rdf-schema#>
 
 SELECT ?product 
-       (COUNT(DISTINCT ?justifiedVulnerability) AS ?justifiedCount)
+       (SUM(IF(?justificationLabel = "Justified", 1, 0)) AS ?justifiedCount)
+       (SUM(IF(?justificationLabel = "Unjustified", 1, 0)) AS ?unjustifiedCount)
+       (SUM(IF(?justificationLabel = "Unimportant", 1, 0)) AS ?unimportantCount)
+       (SUM(IF(?justificationLabel = "No_change", 1, 0)) AS ?nochangeCount)
        (COUNT(DISTINCT ?vulnerability) AS ?totalVulnerabilities)
-       ((COUNT(DISTINCT ?justifiedVulnerability) * 100.0) / COUNT(DISTINCT ?vulnerability) AS ?justifiedPercentage)
 WHERE {
   ?vulnerability RDF:type TI:Vulnerability .
   ?vulnerability TI:affectsProduct ?product .
-  
-  OPTIONAL {
-    ?justifiedVulnerability TI:affectsProduct ?product .
-    ?justifiedVulnerability TI:hasDescriptionChange ?justification .
-    ?justification RDFS:label ?label .
-    FILTER(?label IN ("Justified")) .
-  }
+  ?vulnerability TI:hasDescriptionChange ?justification .
+  ?justification RDFS:label ?justificationLabel .
+
+  FILTER(?justificationLabel IN ("Justified", "Unjustified", "Unimportant", "No_change"))
 }
 GROUP BY ?product
-ORDER BY  DESC(?justifiedPercentage) DESC(?justifiedCount)
+ORDER BY DESC(?totalVulnerabilities)
+LIMIT 6

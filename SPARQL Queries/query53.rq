@@ -3,19 +3,18 @@ PREFIX RDF: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX RDFS: <http://www.w3.org/2000/01/rdf-schema#>
 
 SELECT ?product 
-       (COUNT(DISTINCT ?highLikelihoodVulnerability) AS ?highLikelihoodCount)
+       (SUM(IF(?likelihoodLabel = "Low", 1, 0)) AS ?lowCount)
+       (SUM(IF(?likelihoodLabel = "Medium", 1, 0)) AS ?mediumCount)
+       (SUM(IF(?likelihoodLabel = "High", 1, 0)) AS ?highCount)
        (COUNT(DISTINCT ?vulnerability) AS ?totalVulnerabilities)
-       ((COUNT(DISTINCT ?highLikelihoodVulnerability) * 100.0) / COUNT(DISTINCT ?vulnerability) AS ?highLikelihoodPercentage)
 WHERE {
-  ?vulnerability RDF:type TI:Vulnerability . 
+  ?vulnerability RDF:type TI:Vulnerability .
   ?vulnerability TI:affectsProduct ?product .
-  
-  OPTIONAL {
-    ?highLikelihoodVulnerability TI:affectsProduct ?product .
-    ?highLikelihoodVulnerability TI:hasLikelihood ?likelihood .
-    ?likelihood RDFS:label ?likelihoodLabel .
-    FILTER(?likelihoodLabel = "High") .
-  }
+  ?vulnerability TI:hasLikelihood ?likelihood .
+  ?likelihood RDFS:label ?likelihoodLabel .
+
+  FILTER(?likelihoodLabel IN ("Low", "Medium", "High"))
 }
 GROUP BY ?product
-ORDER BY DESC(?highLikelihoodPercentage) DESC(?highLikelihoodCount)
+ORDER BY DESC(?totalVulnerabilities)
+LIMIT 6

@@ -29,6 +29,7 @@ Pipeline:
 
 Further directories:
 * SPARQL Queries: SPARQL queries for ontological analysis, including results for comparative risk analyses
+* Figures: includes all the created figures, bar charts, and plots
 
 
 Extra files (excluded from final pipeline):

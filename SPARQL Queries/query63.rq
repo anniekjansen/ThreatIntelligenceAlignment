@@ -1,0 +1,16 @@
+PREFIX TI: <http://example.org/threatintelligence/>
+PREFIX RDF: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX RDFS: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?justificationType ?likelihoodType (COUNT(DISTINCT ?vulnerability) AS ?count)
+WHERE {
+  ?vulnerability RDF:type TI:Vulnerability .
+
+  ?vulnerability TI:hasLikelihood ?likelihood .
+  ?likelihood RDFS:label ?likelihoodType .
+
+  ?vulnerability TI:hasDescriptionChange ?justification .
+  ?justification RDFS:label ?justificationType .
+}
+GROUP BY ?justificationType ?likelihoodType
+ORDER BY ?justificationType ?likelihoodType

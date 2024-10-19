@@ -1,7 +1,5 @@
 import pandas as pd
 import datetime
-import seaborn as sns
-import matplotlib.pyplot as plt
 import ast
 import string
 import re
@@ -114,7 +112,6 @@ class DataProcessor:
         'Attachmate Reflection': 'Attachmate Reflection',
         'BEA Systems JRockit': 'BEA Systems JRockit',
         'Diverse IBM-producten (zie "Mogelijke oplossingen")': 'IBM',
-        # 'Diverse IBM-producten (zMicrosoft Internet Explorer &quot;Mogelijke oplossingen&quot;)': 'IBM',
         'Diverse IBM-producten (zie &quot;Mogelijke oplossingen&quot;)': 'IBM',
         'edge': 'Microsoft Edge',
         'Edge': 'Microsoft Edge',
@@ -393,14 +390,6 @@ class DataProcessor:
         'x86': 'Windows'
         }
 
-        # if security_dataset == "APT":
-        #     combined_mapping = {**product_mapping, **os_mapping}
-        #     # combined_mapping = sorted(combined_mapping, key=len, reverse=True)
-        #     patterns = '|'.join(re.escape(key) for key in sorted(combined_mapping, key=len, reverse=True))
-        #     data['product'] = data['product'].str.replace(patterns, lambda m: combined_mapping[m.group()], regex=True)
-        #     data['os'] = data['os'].str.replace(patterns, lambda m: combined_mapping[m.group()], regex=True)
-        #     data['version'] = data['version'].apply(lambda x: self.extract_version_apt(x) if x else x)
-
         if security_dataset == "APT":
             data["product"] = data["product"].apply(lambda x: self.replace_values_apt(x, product_mapping))
             data["os"] = data["os"].apply(lambda x: self.replace_values_apt(x, os_mapping))
@@ -420,7 +409,7 @@ class DataProcessor:
             match = re.search(pattern, item)
             if match:
                 version = match.group(0)
-                if version.isdigit():  # Check if the version is numeric
+                if version.isdigit():
                     versions.append(version)
         return versions if versions else ["Unrecovered"]
 
@@ -429,6 +418,6 @@ class DataProcessor:
         match = re.search(pattern, x)
         if match:
             version = match.group(0)
-            if version.isdigit():  # Check if the version is numeric
+            if version.isdigit(): 
                 return version
         return "Unrecovered"

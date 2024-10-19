@@ -10,7 +10,7 @@ class DataAnalyzer:
             print(column)
 
     def print_info(self, data):
-        print(data.shape) # rows and columns
+        print(data.shape)
         print(data.head())
         print(data.tail())
         print(data.iloc[0])

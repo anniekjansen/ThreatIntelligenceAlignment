@@ -1,5 +1,3 @@
-import pandas as pd
-
 class ClassificationEngineering:
 
     def create_change_columns(self, df, kans_schade):
