@@ -1,4 +1,4 @@
-# Repository for Thesis
+# Threat Intelligence Alignment
 
 MSc Artificial Intelligence
 
@@ -29,10 +29,9 @@ Pipeline:
 
 Further directories:
 * SPARQL Queries: SPARQL queries for ontological analysis, including results for comparative risk analyses
-* Figures: includes all the created figures, bar charts, and plots
 
 
-Extra files (excluded from final pipeline):
+Extra Files (excluded from final pipeline):
 * DataScraper.py: functions to scrape data from the NCSC website
 * data_scraping.py: scrape kans/schade data from web using NCSC IDs
 * NLTKProcessor.py: functions to implement NLTK 
