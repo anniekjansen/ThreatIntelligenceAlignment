@@ -27,13 +27,10 @@ Pipeline:
 * RQ2_charts.py: charts for ontological analysis
 * RQ2_comp_analysis.py: comparative risk analyses
 
+Input files:
+* NCSC_advisories_initial.csv: initial NCSC dataset
+* URREF.owl: original URREF ontology
+
 Further directories:
 * SPARQL Queries: SPARQL queries for ontological analysis, including results for comparative risk analyses
-
-
-Extra Files (excluded from final pipeline):
-* DataScraper.py: functions to scrape data from the NCSC website
-* data_scraping.py: scrape kans/schade data from web using NCSC IDs
-* NLTKProcessor.py: functions to implement NLTK 
-* nltk_processing.py: natural language processing of Beschrijving using NLTK
-* spacy_processing.py: natural language processing of Beschrijving using Spacy
+* Extra Files: excluded from the article.
